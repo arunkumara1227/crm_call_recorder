@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Default API key — CHANGE THIS before non-local use!
+         Edit via Settings → Technical → System Parameters → key "crm_call_recorder.api_key". -->
+    <record id="default_api_key" model="ir.config_parameter">
+        <field name="key">crm_call_recorder.api_key</field>
+        <field name="value">my-secret-key-2026</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Top-level "Call Recorder" menu under Sales root -->
+    <menuitem id="menu_call_recorder_root"
+              name="Call Recorder"
+              parent="sale.sale_menu_root"
+              sequence="60"
+              groups="crm_call_recorder.group_call_recorder_user"/>
+
+    <menuitem id="menu_call_recordings"
+              name="Recordings"
+              parent="menu_call_recorder_root"
+              action="action_crm_call_recording"
+              sequence="10"
+              groups="crm_call_recorder.group_call_recorder_user"/>
+
+</odoo>

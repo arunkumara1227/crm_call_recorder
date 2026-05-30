@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ─── List view ─────────────────────────────────────────────────── -->
+    <record id="view_crm_call_recording_list" model="ir.ui.view">
+        <field name="name">crm.call.recording.list</field>
+        <field name="model">crm.call.recording</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'matched'"
+                  decoration-warning="state == 'unmatched'"
+                  decoration-danger="state == 'failed'">
+                <field name="call_date"/>
+                <field name="phone"/>
+                <field name="matched_partner_id"/>
+                <field name="matched_lead_id" optional="show"/>
+                <field name="direction" widget="badge"/>
+                <field name="duration_display" string="Duration"/>
+                <field name="sim_label" optional="show"/>
+                <field name="created_by_api_key_id" string="Uploaded via" optional="hide"/>
+                <field name="state" widget="badge"/>
+                <field name="has_recording" widget="boolean_toggle" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ─── Form view ─────────────────────────────────────────────────── -->
+    <record id="view_crm_call_recording_form" model="ir.ui.view">
+        <field name="name">crm.call.recording.form</field>
+        <field name="model">crm.call.recording</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_relink" type="object"
+                            string="Re-match" class="btn-primary"
+                            invisible="state == 'matched'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="pending,matched,unmatched"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="display_label" class="oe_edit_only"/>
+                        <h1><field name="display_label" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Call">
+                            <field name="phone"/>
+                            <field name="phone_digits" readonly="1"/>
+                            <field name="direction"/>
+                            <field name="duration_display"/>
+                            <field name="call_date"/>
+                            <field name="sim_label"/>
+                        </group>
+                        <group string="Match">
+                            <field name="matched_partner_id"/>
+                            <field name="matched_lead_id"/>
+                            <field name="created_by_api_key_id" string="Uploaded via"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Recording" name="recording">
+                            <group>
+                                <field name="has_recording" invisible="1"/>
+                                <field name="recording_attachment_id" readonly="1"
+                                       invisible="not has_recording"/>
+                                <field name="recording_size_kb" string="Size (KB)"
+                                       invisible="not has_recording"/>
+                                <field name="recording_url" widget="url"
+                                       string="Open / Download"
+                                       readonly="1" invisible="not has_recording"/>
+                            </group>
+                            <div invisible="has_recording" class="alert alert-warning mt-2">
+                                No audio attached. The Android client should POST a file
+                                along with the metadata.
+                            </div>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note" placeholder="Manual notes…"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ─── Search view ───────────────────────────────────────────────── -->
+    <record id="view_crm_call_recording_search" model="ir.ui.view">
+        <field name="name">crm.call.recording.search</field>
+        <field name="model">crm.call.recording</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="phone"/>
+                <field name="matched_partner_id"/>
+                <field name="matched_lead_id"/>
+                <separator/>
+                <filter name="matched" string="Matched"
+                        domain="[('state', '=', 'matched')]"/>
+                <filter name="unmatched" string="Unmatched"
+                        domain="[('state', '=', 'unmatched')]"/>
+                <filter name="failed" string="Failed"
+                        domain="[('state', '=', 'failed')]"/>
+                <separator/>
+                <filter name="incoming" string="Incoming"
+                        domain="[('direction', '=', 'incoming')]"/>
+                <filter name="outgoing" string="Outgoing"
+                        domain="[('direction', '=', 'outgoing')]"/>
+                <separator/>
+                <filter name="group_state" string="Status"
+                        context="{'group_by': 'state'}"/>
+                <filter name="group_partner" string="Contact"
+                        context="{'group_by': 'matched_partner_id'}"/>
+                <filter name="group_direction" string="Direction"
+                        context="{'group_by': 'direction'}"/>
+                <filter name="group_date" string="Date"
+                        context="{'group_by': 'call_date:day'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ─── Pivot for analytics ───────────────────────────────────────── -->
+    <record id="view_crm_call_recording_pivot" model="ir.ui.view">
+        <field name="name">crm.call.recording.pivot</field>
+        <field name="model">crm.call.recording</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="direction" type="col"/>
+                <field name="call_date" interval="day" type="row"/>
+                <field name="duration_seconds" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ─── Window action ─────────────────────────────────────────────── -->
+    <record id="action_crm_call_recording" model="ir.actions.act_window">
+        <field name="name">Recordings</field>
+        <field name="res_model">crm.call.recording</field>
+        <field name="view_mode">list,form,pivot</field>
+        <field name="search_view_id" ref="view_crm_call_recording_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No call recordings yet.
+            </p>
+            <p>
+                Recordings appear here when the Android companion app POSTs a
+                file to <code>/crm_call_recorder/upload</code> with the
+                shared API key.
+            </p>
+        </field>
+    </record>
+
+</odoo>

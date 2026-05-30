@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ─── List view ─────────────────────────────────────────────────── -->
+    <record id="view_crm_call_api_key_list" model="ir.ui.view">
+        <field name="name">crm.call.api.key.list</field>
+        <field name="model">crm.call.api.key</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="not active">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="key_prefix"/>
+                <field name="recording_count" string="Uploads"/>
+                <field name="last_used"/>
+                <field name="expires_at" optional="hide"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ─── Form view ─────────────────────────────────────────────────── -->
+    <record id="view_crm_call_api_key_form" model="ir.ui.view">
+        <field name="name">crm.call.api.key.form</field>
+        <field name="model">crm.call.api.key</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_generate_key" type="object"
+                            string="Generate New Key" class="btn-primary"
+                            confirm="This will replace any existing key on this row. The new key will be shown only once. Continue?"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Arun's Infinix"/></h1>
+                    </div>
+                    <group>
+                        <group string="Identity">
+                            <field name="user_id"/>
+                            <field name="active"/>
+                            <field name="expires_at"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Usage">
+                            <field name="key_prefix"/>
+                            <field name="last_used"/>
+                            <field name="last_used_ip"/>
+                            <field name="recording_count" string="Uploads"/>
+                        </group>
+                    </group>
+                    <div invisible="key_prefix" class="alert alert-info mt-3">
+                        No key generated yet. Save the row, then click
+                        <b>Generate New Key</b> in the header.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ─── Wizard form (one-time plaintext display) ──────────────────── -->
+    <record id="view_crm_call_api_key_wizard_form" model="ir.ui.view">
+        <field name="name">crm.call.api.key.wizard.form</field>
+        <field name="model">crm.call.api.key.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Your API Key">
+                <group>
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Copy this key now!</strong>
+                        It will NOT be shown again. Paste it into the
+                        Android app's Settings → API Key field, then save.
+                    </div>
+                    <field name="api_key" widget="CopyClipboardChar"/>
+                </group>
+                <footer>
+                    <button string="I've copied the key" class="btn-primary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ─── Search view ───────────────────────────────────────────────── -->
+    <record id="view_crm_call_api_key_search" model="ir.ui.view">
+        <field name="name">crm.call.api.key.search</field>
+        <field name="model">crm.call.api.key</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="key_prefix"/>
+                <separator/>
+                <filter name="active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="inactive" string="Revoked" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="group_user" string="User" context="{'group_by': 'user_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ─── Action ────────────────────────────────────────────────────── -->
+    <record id="action_crm_call_api_key" model="ir.actions.act_window">
+        <field name="name">API Keys</field>
+        <field name="res_model">crm.call.api.key</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_crm_call_api_key_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create one key per Android device.
+            </p>
+            <p>
+                Save the row, click <b>Generate New Key</b>, copy the plaintext
+                from the popup, paste it into the phone's
+                <b>CRM Call Recorder → Settings → API Key</b>. Revoke a key
+                later by unchecking <b>Active</b>.
+            </p>
+        </field>
+    </record>
+
+    <!-- ─── Menu (manager-only) ───────────────────────────────────────── -->
+    <menuitem id="menu_call_recorder_api_keys"
+              name="API Keys"
+              parent="menu_call_recorder_root"
+              action="action_crm_call_api_key"
+              sequence="20"
+              groups="crm_call_recorder.group_call_recorder_manager"/>
+
+</odoo>

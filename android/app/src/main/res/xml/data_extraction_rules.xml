@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- API key + queue DB are sensitive and tied to this device's Keystore;
+     restoring them on another device wouldn't work. Exclude from backups. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="crmcallrec_prefs.xml"/>
+        <exclude domain="database" path="crmcallrec.db"/>
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="crmcallrec_prefs.xml"/>
+        <exclude domain="database" path="crmcallrec.db"/>
+    </device-transfer>
+</data-extraction-rules>

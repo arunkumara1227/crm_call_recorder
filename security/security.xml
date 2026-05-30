@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Module category in the User-form Privileges section -->
+    <record id="module_category_crm_call_recorder" model="ir.module.category">
+        <field name="name">CRM Call Recorder</field>
+        <field name="sequence">28</field>
+    </record>
+
+    <!-- Privilege intermediate (Odoo 19 pattern — see plan AI-Bugfix) -->
+    <record id="privilege_crm_call_recorder" model="res.groups.privilege">
+        <field name="name">CRM Call Recorder</field>
+        <field name="sequence">28</field>
+        <field name="category_id" ref="module_category_crm_call_recorder"/>
+    </record>
+
+    <!-- User group — can see + manually relink recordings -->
+    <record id="group_call_recorder_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="privilege_crm_call_recorder"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Manager group — can also delete recordings and change the API key -->
+    <record id="group_call_recorder_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="privilege_crm_call_recorder"/>
+        <field name="implied_ids" eval="[(4, ref('group_call_recorder_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- Record rules: users see all (no per-agent isolation here, unlike
+         phone_call_recording which had that concept). The PDF's model is
+         shared-across-team. Add a per-user filter later if needed. -->
+    <record id="call_recording_user_rule" model="ir.rule">
+        <field name="name">Call Recording: user read/write</field>
+        <field name="model_id" ref="model_crm_call_recording"/>
+        <field name="groups" eval="[(4, ref('group_call_recorder_user'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="call_recording_manager_rule" model="ir.rule">
+        <field name="name">Call Recording: manager full access</field>
+        <field name="model_id" ref="model_crm_call_recording"/>
+        <field name="groups" eval="[(4, ref('group_call_recorder_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+</odoo>

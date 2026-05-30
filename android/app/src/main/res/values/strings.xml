@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CRM Call Recorder</string>
+
+    <string name="nav_status">Status</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_server">Server URL</string>
+    <string name="settings_database">Database</string>
+    <string name="settings_api_key">API Key</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_test">Test Connection</string>
+
+    <string name="status_title">Recent Uploads</string>
+    <string name="status_empty">No uploads yet. Make a call — it will appear here automatically.</string>
+
+    <string name="notif_channel_watcher">Call recording watcher</string>
+    <string name="notif_channel_watcher_desc">Required so the app can watch for new call recordings in the background.</string>
+    <string name="notif_watching_title">CRM Call Recorder</string>
+    <string name="notif_watching_text">Watching for new recordings…</string>
+
+    <string name="perm_rationale_title">Permissions needed</string>
+    <string name="perm_rationale_body">CRM Call Recorder needs access to your call log, audio files, and notifications to detect new call recordings and upload them to your Odoo CRM.</string>
+    <string name="perm_grant">Grant permissions</string>
+    <string name="perm_open_settings">Open app settings</string>
+
+    <string name="status_state_pending">Pending</string>
+    <string name="status_state_uploading">Uploading</string>
+    <string name="status_state_done">Done</string>
+    <string name="status_state_failed">Failed</string>
+
+    <string name="settings_sim_section">SIM filter</string>
+    <string name="settings_sim_hint">Recordings from SIMs you turn off will be skipped — they won\'t reach Odoo.</string>
+    <string name="settings_sim_none">No SIMs detected. Grant phone permission and reopen the app.</string>
+    <string name="settings_sim_all_allowed">All SIMs allowed (default).</string>
+</resources>

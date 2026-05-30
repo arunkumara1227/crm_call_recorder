@@ -1,0 +1,34 @@
+# Python / Odoo
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Android Studio / Gradle build artifacts
+android/.gradle/
+android/.kotlin/
+android/.idea/
+android/build/
+android/app/build/
+android/local.properties
+android/captures/
+android/*.iml
+android/app/*.iml
+
+# Gradle daemon junk that sometimes leaks into the project dir
+android/.cxx/
+android/app/.cxx/
+
+# Sensitive — never commit keystores or signing configs
+android/*.jks
+android/*.keystore
+android/key.properties
+android/keystore.properties
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor swap files
+*.swp
+*~
