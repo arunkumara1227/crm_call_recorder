@@ -3,3 +3,4 @@ access_crm_call_recording_user,crm.call.recording user,model_crm_call_recording,
 access_crm_call_recording_manager,crm.call.recording manager,model_crm_call_recording,group_call_recorder_manager,1,1,1,1
 access_crm_call_api_key_manager,crm.call.api.key manager,model_crm_call_api_key,group_call_recorder_manager,1,1,1,1
 access_crm_call_api_key_wizard_manager,crm.call.api.key.wizard manager,model_crm_call_api_key_wizard,group_call_recorder_manager,1,1,1,0
+access_crm_call_voice_config_manager,crm.call.voice.config manager,model_crm_call_voice_config,group_call_recorder_manager,1,1,1,1

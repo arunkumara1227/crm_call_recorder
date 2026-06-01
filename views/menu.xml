@@ -15,4 +15,18 @@
               sequence="10"
               groups="crm_call_recorder.group_call_recorder_user"/>
 
+    <!-- Configuration submenu (manager-only) -->
+    <menuitem id="menu_call_recorder_config"
+              name="Configuration"
+              parent="menu_call_recorder_root"
+              sequence="90"
+              groups="crm_call_recorder.group_call_recorder_manager"/>
+
+    <menuitem id="menu_call_recorder_voice_config"
+              name="Voice Transcription"
+              parent="menu_call_recorder_config"
+              action="action_crm_call_voice_config"
+              sequence="10"
+              groups="crm_call_recorder.group_call_recorder_manager"/>
+
 </odoo>

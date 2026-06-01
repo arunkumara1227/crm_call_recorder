@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ─── Form view ─────────────────────────────────────────────────── -->
+    <record id="view_crm_call_voice_config_form" model="ir.ui.view">
+        <field name="name">crm.call.voice.config.form</field>
+        <field name="model">crm.call.voice.config</field>
+        <field name="arch" type="xml">
+            <form string="Voice Transcription Settings">
+                <header>
+                    <button name="action_save_config" type="object"
+                            string="Save" class="btn-primary"/>
+                    <button name="action_test_connection" type="object"
+                            string="Test Connection" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Voice Transcription</h1>
+                        <p class="text-muted">
+                            Auto-transcribe uploaded call recordings into text via
+                            Google Gemini, Groq (free 2h/day), or OpenAI Whisper.
+                        </p>
+                    </div>
+
+                    <group string="Master Toggle">
+                        <field name="transcription_enabled" widget="boolean_toggle"/>
+                        <p class="text-muted">
+                            OFF: new uploads keep <i>status = "Skipped"</i> and the cron does nothing.
+                            Turn ON only after pasting at least one provider's key and saving.
+                        </p>
+                    </group>
+
+                    <group string="Output Language">
+                        <field name="translate_to_english" widget="boolean_toggle"/>
+                        <p class="text-muted">
+                            ON: calls in any language are transcribed AS English
+                            (e.g. Tamil "வணக்கம்" → "Welcome"). Detected source
+                            language is still saved for audit.
+                            OFF: keep the original-language transcript only.
+                        </p>
+                    </group>
+
+                    <group string="Transcription Provider">
+                        <field name="transcription_provider" widget="radio"/>
+                    </group>
+
+                    <group string="Google Gemini"
+                           invisible="transcription_provider != 'gemini'">
+                        <field name="gemini_api_key" password="True"
+                               placeholder="AIzaSy..."/>
+                        <field name="gemini_model"/>
+                        <field name="gemini_custom_model"
+                               placeholder="e.g. gemini-3-flash-preview"
+                               invisible="gemini_model != 'custom'"/>
+                        <p class="text-muted">
+                            Get an API key at <b>ai.google.dev</b>. Generous free tier.
+                        </p>
+                    </group>
+
+                    <group string="Groq (Free)"
+                           invisible="transcription_provider != 'groq'">
+                        <field name="groq_api_key" password="True"
+                               placeholder="gsk_..."/>
+                        <field name="groq_model" placeholder="whisper-large-v3"/>
+                        <p class="text-muted">
+                            Free tier: 2 hours of audio/day. Uses Whisper Large V3.
+                            Get a key at <b>console.groq.com</b>.
+                        </p>
+                    </group>
+
+                    <group string="OpenAI Whisper"
+                           invisible="transcription_provider != 'openai'">
+                        <field name="openai_api_key" password="True"
+                               placeholder="sk-..."/>
+                        <field name="openai_model"/>
+                        <p class="text-muted">
+                            Paid: Whisper-1 ~$0.006/min. GPT-4o variants are
+                            more accurate but pricier. Get a key at <b>platform.openai.com</b>.
+                        </p>
+                    </group>
+
+                    <group string="Advanced">
+                        <field name="ffmpeg_path"
+                               placeholder="C:\ffmpeg\bin\ffmpeg.exe (leave empty to use PATH)"/>
+                        <p class="text-muted">
+                            Only used by <b>Groq</b> and <b>OpenAI Whisper</b> to
+                            transcode Infinix's raw AAC into MP3 before upload.
+                            <b>Gemini</b> accepts AAC natively and doesn't need ffmpeg.
+                        </p>
+                    </group>
+
+                    <group string="Status" invisible="not status_message">
+                        <field name="status_message" readonly="1" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ─── Action ────────────────────────────────────────────────────── -->
+    <record id="action_crm_call_voice_config" model="ir.actions.server">
+        <field name="name">Voice Transcription</field>
+        <field name="model_id" ref="model_crm_call_voice_config"/>
+        <field name="state">code</field>
+        <field name="code">
+config = env['crm.call.voice.config'].sudo().get_config()
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Voice Transcription Settings',
+    'res_model': 'crm.call.voice.config',
+    'view_mode': 'form',
+    'res_id': config.id,
+    'target': 'current',
+    'context': {'form_view_initial_mode': 'edit'},
+}
+        </field>
+    </record>
+
+</odoo>

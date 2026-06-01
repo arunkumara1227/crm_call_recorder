@@ -1,8 +1,10 @@
+import base64
 import re
 import logging
 from markupsafe import Markup
 
 from odoo import api, fields, models, _
+from . import voice_utils
 
 _logger = logging.getLogger(__name__)
 
@@ -74,6 +76,36 @@ class CallRecording(models.Model):
         ondelete='set null',
         help='Per-device API key that authenticated this upload. Empty for '
              'uploads authenticated via the legacy shared sysparam key.',
+    )
+
+    # ─── Transcription fields ─────────────────────────────────────────
+    transcription_status = fields.Selection([
+        ('skipped', 'Skipped'),
+        ('pending', 'Pending'),
+        ('done', 'Done'),
+        ('failed', 'Failed'),
+    ], string='Transcript', default='skipped', tracking=True, index=True,
+       help='Skipped: transcription was OFF at upload time. '
+            'Pending: queued for the next cron tick. '
+            'Done: text + language populated. '
+            'Failed: provider error or low-confidence audio.')
+
+    transcription_text = fields.Text(
+        'Transcript Text', readonly=True,
+        help='English text (when Translate to English is ON) or original-language '
+             'transcript (when OFF). Set by the cron worker; not user-editable.',
+    )
+    transcription_language = fields.Char(
+        'Source Language', readonly=True,
+        help='ISO code of the spoken language detected by the provider (e.g. en, hi, ta).',
+    )
+    transcription_provider_used = fields.Char(
+        'Transcribed by', readonly=True,
+        help='Which backend produced the transcript (groq / openai / gemini).',
+    )
+    transcription_error = fields.Char(
+        'Transcript Error', readonly=True,
+        help='Last error message when transcription failed.',
     )
 
     company_id = fields.Many2one(
@@ -265,3 +297,91 @@ class CallRecording(models.Model):
             else:
                 rec.state = 'unmatched'
         return True
+
+    # ──────────────────────────────────────────────────────────────────
+    # Transcription
+    # ──────────────────────────────────────────────────────────────────
+
+    def action_transcribe_now(self):
+        """Reset to 'pending' so the next cron tick picks it up regardless
+        of current status. Lets admin retry failed rows after fixing config."""
+        for rec in self:
+            rec.write({
+                'transcription_status': 'pending',
+                'transcription_error': False,
+            })
+        return True
+
+    @api.model
+    def _run_transcription_batch(self, limit=10):
+        """Called by the cron. Picks up to `limit` pending rows and runs each
+        through voice_utils.transcribe_audio. Each row is wrapped in its own
+        savepoint so one bad attachment doesn't poison the whole batch.
+        """
+        config = self.env['crm.call.voice.config'].sudo().get_config()
+        if not config.transcription_enabled:
+            # Defensive: cron may have been left active after admin disabled
+            # transcription in config. Don't process anything.
+            return
+
+        pending = self.search(
+            [('transcription_status', '=', 'pending')],
+            order='call_date asc', limit=limit,
+        )
+        if not pending:
+            return
+
+        done = failed = no_audio = 0
+        for rec in pending:
+            try:
+                with self.env.cr.savepoint():
+                    if not rec.recording_attachment_id:
+                        rec.write({
+                            'transcription_status': 'failed',
+                            'transcription_error': 'No audio attachment on record.',
+                        })
+                        no_audio += 1
+                        continue
+                    try:
+                        audio_bytes = base64.b64decode(rec.recording_attachment_id.datas)
+                    except Exception as e:
+                        rec.write({
+                            'transcription_status': 'failed',
+                            'transcription_error': f'Failed to read attachment: {e}',
+                        })
+                        failed += 1
+                        continue
+
+                    result = voice_utils.transcribe_audio(audio_bytes, env=self.env)
+                    err = result.get('error')
+                    text = (result.get('text') or '').strip()
+                    if err and not text:
+                        rec.write({
+                            'transcription_status': 'failed',
+                            'transcription_error': err,
+                        })
+                        failed += 1
+                    else:
+                        rec.write({
+                            'transcription_status': 'done',
+                            'transcription_text': text,
+                            'transcription_language': result.get('language') or '',
+                            'transcription_provider_used': result.get('provider') or config.transcription_provider,
+                            'transcription_error': False,
+                        })
+                        done += 1
+            except Exception as e:
+                _logger.exception("Transcription failed for row %s: %s", rec.id, e)
+                try:
+                    rec.write({
+                        'transcription_status': 'failed',
+                        'transcription_error': str(e)[:1000],
+                    })
+                except Exception:
+                    pass
+                failed += 1
+
+        _logger.info(
+            "Transcription batch: done=%d failed=%d no_audio=%d (of %d pending)",
+            done, failed, no_audio, len(pending),
+        )

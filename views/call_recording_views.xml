@@ -17,6 +17,7 @@
                 <field name="duration_display" string="Duration"/>
                 <field name="sim_label" optional="show"/>
                 <field name="created_by_api_key_id" string="Uploaded via" optional="hide"/>
+                <field name="transcription_status" widget="badge" optional="show"/>
                 <field name="state" widget="badge"/>
                 <field name="has_recording" widget="boolean_toggle" optional="show"/>
             </list>
@@ -33,6 +34,9 @@
                     <button name="action_relink" type="object"
                             string="Re-match" class="btn-primary"
                             invisible="state == 'matched'"/>
+                    <button name="action_transcribe_now" type="object"
+                            string="Transcribe Now" class="btn-secondary"
+                            invisible="transcription_status in ('pending', 'done')"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="pending,matched,unmatched"/>
                 </header>
@@ -74,6 +78,22 @@
                                 along with the metadata.
                             </div>
                         </page>
+                        <page string="Transcript" name="transcript">
+                            <group>
+                                <field name="transcription_status" widget="badge"/>
+                                <field name="transcription_language"
+                                       invisible="transcription_status != 'done'"/>
+                                <field name="transcription_provider_used"
+                                       invisible="transcription_status != 'done'"/>
+                            </group>
+                            <field name="transcription_text" readonly="1"
+                                   placeholder="Transcript will appear here once the cron processes this row."
+                                   nolabel="1"/>
+                            <div invisible="not transcription_error"
+                                 class="alert alert-warning mt-2">
+                                <strong>Error:</strong> <field name="transcription_error" readonly="1" nolabel="1"/>
+                            </div>
+                        </page>
                         <page string="Notes" name="notes">
                             <field name="note" placeholder="Manual notes…"/>
                         </page>
@@ -106,8 +126,17 @@
                 <filter name="outgoing" string="Outgoing"
                         domain="[('direction', '=', 'outgoing')]"/>
                 <separator/>
+                <filter name="transcript_done" string="Transcribed"
+                        domain="[('transcription_status', '=', 'done')]"/>
+                <filter name="transcript_pending" string="Awaiting transcript"
+                        domain="[('transcription_status', '=', 'pending')]"/>
+                <filter name="transcript_failed" string="Transcript failed"
+                        domain="[('transcription_status', '=', 'failed')]"/>
+                <separator/>
                 <filter name="group_state" string="Status"
                         context="{'group_by': 'state'}"/>
+                <filter name="group_transcript" string="Transcript Status"
+                        context="{'group_by': 'transcription_status'}"/>
                 <filter name="group_partner" string="Contact"
                         context="{'group_by': 'matched_partner_id'}"/>
                 <filter name="group_direction" string="Direction"

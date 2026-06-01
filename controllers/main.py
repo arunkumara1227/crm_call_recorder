@@ -171,6 +171,12 @@ class CrmCallRecorderController(http.Controller):
         })
         rec.recording_attachment_id = att.id
 
+        # Mark for transcription IF the master toggle is on; cron will pick it up.
+        # Otherwise keep status 'skipped' so the field is meaningful in the UI.
+        voice_cfg = request.env['crm.call.voice.config'].sudo().get_config()
+        if voice_cfg.transcription_enabled:
+            rec.sudo().write({'transcription_status': 'pending'})
+
         # _match_and_link was already called inside create(); now that the
         # attachment exists, re-post the chatter note so it carries the audio.
         if rec.state == 'matched':

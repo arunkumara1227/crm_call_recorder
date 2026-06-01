@@ -103,13 +103,15 @@ class RecordingRepository(
      *   - non-null pref:
      *       - sim resolved AND id in set     → allowed
      *       - sim resolved AND id NOT in set → blocked
-     *       - sim unresolved                 → blocked (cautious default —
-     *         user has explicitly chosen which SIMs to allow, so we don't
-     *         leak unknown-SIM recordings)
+     *       - sim unresolved                 → ALLOWED (permissive default).
+     *         OEMs like Infinix XOS sometimes report opaque PHONE_ACCOUNT_ID
+     *         values that don't map to any SubscriptionInfo, so insisting on a
+     *         match would silently drop legitimate calls. The explicit toggles
+     *         still work for SIMs that do resolve cleanly.
      */
     private fun isSimAllowed(sim: com.alphalize.crmcallrec.domain.SimInfo?): Boolean {
         val allowed = prefs.allowedSimSubIds ?: return true
-        if (sim == null) return false
+        if (sim == null) return true
         return sim.subscriptionId in allowed
     }
 

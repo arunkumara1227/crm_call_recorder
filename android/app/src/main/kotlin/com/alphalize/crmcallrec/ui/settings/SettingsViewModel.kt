@@ -38,6 +38,21 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
 
     fun refreshSims() {
         _sims.value = locator.sims.listActive()
+        // Self-heal: after a SIM hot-swap (eSIM change, dual-SIM mode toggle,
+        // region change) the stored allow-list may contain IDs for SIMs that
+        // are no longer active. Prune those stale IDs. If the pruned set
+        // covers every currently-active SIM, collapse back to null (= the
+        // "all allowed" default).
+        val activeIds = _sims.value.map { it.subscriptionId }.toSet()
+        val current = locator.prefs.allowedSimSubIds
+        if (current != null && activeIds.isNotEmpty()) {
+            val pruned = current.intersect(activeIds)
+            val nextValue: Set<Int>? = if (pruned == activeIds) null else pruned
+            if (nextValue != current) {
+                locator.prefs.allowedSimSubIds = nextValue
+                _allowedSimIds.value = nextValue
+            }
+        }
     }
 
     /** UI toggles call this — flip a SIM's allowed/blocked state. */
