@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_crm_call_tone_keyword_list" model="ir.ui.view">
+        <field name="name">crm.call.tone.keyword.list</field>
+        <field name="model">crm.call.tone.keyword</field>
+        <field name="arch" type="xml">
+            <list decoration-success="category == 'soft'"
+                  decoration-warning="category == 'hard'"
+                  decoration-danger="category == 'profanity'">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="category" widget="badge"/>
+                <field name="match_type"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_crm_call_tone_keyword_form" model="ir.ui.view">
+        <field name="name">crm.call.tone.keyword.form</field>
+        <field name="model">crm.call.tone.keyword</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Hindi soft language"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="category"/>
+                            <field name="match_type"/>
+                            <field name="active"/>
+                            <field name="sequence" string="Order"/>
+                        </group>
+                    </group>
+                    <separator string="Keywords"/>
+                    <field name="keywords" placeholder="One keyword or phrase per line."
+                           widget="text" nolabel="1"/>
+                    <separator string="Notes"/>
+                    <field name="description" placeholder="Free-text notes for the team."
+                           nolabel="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_crm_call_tone_keyword" model="ir.actions.act_window">
+        <field name="name">Tone Keywords</field>
+        <field name="res_model">crm.call.tone.keyword</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Edit the bundled keyword lists or add your own.
+            </p>
+            <p>
+                Soft keywords +12 to the tone score (cap +42). Hard +
+                profanity each subtract 18 (cap -54). VADER sentiment adds ±30.
+                Final score: 0 = harshest, 50 = neutral, 100 = most polite.
+            </p>
+        </field>
+    </record>
+
+</odoo>

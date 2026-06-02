@@ -29,4 +29,39 @@
               sequence="10"
               groups="crm_call_recorder.group_call_recorder_manager"/>
 
+    <menuitem id="menu_call_recorder_tone_keywords"
+              name="Tone Keywords"
+              parent="menu_call_recorder_config"
+              action="action_crm_call_tone_keyword"
+              sequence="20"
+              groups="crm_call_recorder.group_call_recorder_manager"/>
+
+    <!-- ─── Tone Analysis section (user-visible) ─── -->
+    <menuitem id="menu_call_recorder_tone_root"
+              name="Tone Analysis"
+              parent="menu_call_recorder_root"
+              sequence="30"
+              groups="crm_call_recorder.group_call_recorder_user"/>
+
+    <menuitem id="menu_call_recorder_tone_report"
+              name="Tone Report"
+              parent="menu_call_recorder_tone_root"
+              action="action_crm_call_tone_report"
+              sequence="10"
+              groups="crm_call_recorder.group_call_recorder_user"/>
+
+    <menuitem id="menu_call_recorder_tone_all"
+              name="All Tones"
+              parent="menu_call_recorder_tone_root"
+              action="action_crm_call_tone_all"
+              sequence="20"
+              groups="crm_call_recorder.group_call_recorder_user"/>
+
+    <menuitem id="menu_call_recorder_tone_harsh"
+              name="Harsh Calls"
+              parent="menu_call_recorder_tone_root"
+              action="action_crm_call_tone_harsh"
+              sequence="30"
+              groups="crm_call_recorder.group_call_recorder_user"/>
+
 </odoo>

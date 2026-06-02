@@ -37,6 +37,9 @@
                     <button name="action_transcribe_now" type="object"
                             string="Transcribe Now" class="btn-secondary"
                             invisible="transcription_status in ('pending', 'done')"/>
+                    <button name="action_reanalyze_tone" type="object"
+                            string="Re-analyze Tone" class="btn-secondary"
+                            invisible="transcription_status != 'done'"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="pending,matched,unmatched"/>
                 </header>
@@ -93,6 +96,22 @@
                                  class="alert alert-warning mt-2">
                                 <strong>Error:</strong> <field name="transcription_error" readonly="1" nolabel="1"/>
                             </div>
+                        </page>
+                        <page string="Tone" name="tone"
+                              invisible="transcription_status != 'done' or not tone_ids">
+                            <group>
+                                <field name="tone_label" widget="badge"/>
+                                <field name="tone_category"/>
+                                <field name="tone_score" widget="progressbar"/>
+                            </group>
+                            <field name="tone_ids" readonly="1">
+                                <list>
+                                    <field name="sentiment_category"/>
+                                    <field name="sentiment_score"/>
+                                    <field name="soft_keywords_found"/>
+                                    <field name="hard_keywords_found"/>
+                                </list>
+                            </field>
                         </page>
                         <page string="Notes" name="notes">
                             <field name="note" placeholder="Manual notes…"/>

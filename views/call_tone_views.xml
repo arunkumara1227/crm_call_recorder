@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ─── List ──────────────────────────────────────────────────────── -->
+    <record id="view_crm_call_tone_list" model="ir.ui.view">
+        <field name="name">crm.call.tone.list</field>
+        <field name="model">crm.call.tone</field>
+        <field name="arch" type="xml">
+            <list decoration-success="tone_label == 'Soft'"
+                  decoration-warning="tone_label == 'Neutral'"
+                  decoration-danger="tone_label == 'Hard'">
+                <field name="call_date"/>
+                <field name="api_key_id" string="Agent"/>
+                <field name="phone"/>
+                <field name="matched_partner_id" optional="show"/>
+                <field name="tone_label" widget="badge"/>
+                <field name="tone_category" optional="show"/>
+                <field name="tone_score" widget="progressbar"/>
+                <field name="sentiment_category" optional="show"/>
+                <field name="sentiment_score" optional="hide"/>
+                <field name="soft_keywords_found" optional="hide"/>
+                <field name="hard_keywords_found" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ─── Form ──────────────────────────────────────────────────────── -->
+    <record id="view_crm_call_tone_form" model="ir.ui.view">
+        <field name="name">crm.call.tone.form</field>
+        <field name="model">crm.call.tone</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="tone_label" readonly="1"/> ·
+                            <field name="tone_score" readonly="1"/>/100
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Call">
+                            <field name="recording_id" readonly="1"/>
+                            <field name="api_key_id" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="phone" readonly="1"/>
+                            <field name="matched_partner_id" readonly="1"/>
+                            <field name="call_date" readonly="1"/>
+                        </group>
+                        <group string="Analysis">
+                            <field name="tone_category" readonly="1"/>
+                            <field name="tone_score" widget="progressbar" readonly="1"/>
+                            <field name="sentiment_category" readonly="1"/>
+                            <field name="sentiment_score" readonly="1"/>
+                            <field name="is_harsh" readonly="1" invisible="not is_harsh"/>
+                            <field name="is_polite" readonly="1" invisible="not is_polite"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Transcript" name="transcript">
+                            <field name="transcript_text" readonly="1" nolabel="1"/>
+                        </page>
+                        <page string="Soft Keywords Matched" name="soft">
+                            <field name="soft_keywords_found" readonly="1" nolabel="1"/>
+                        </page>
+                        <page string="Hard Keywords Matched" name="hard">
+                            <field name="hard_keywords_found" readonly="1" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ─── Graph (stacked bars: agent × tone category) ──────────────── -->
+    <record id="view_crm_call_tone_graph" model="ir.ui.view">
+        <field name="name">crm.call.tone.graph</field>
+        <field name="model">crm.call.tone</field>
+        <field name="arch" type="xml">
+            <graph type="bar" stacked="1">
+                <field name="api_key_id" string="Agent"/>
+                <field name="tone_category"/>
+                <field name="tone_score" type="measure" string="Avg Tone Score"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ─── Pivot ─────────────────────────────────────────────────────── -->
+    <record id="view_crm_call_tone_pivot" model="ir.ui.view">
+        <field name="name">crm.call.tone.pivot</field>
+        <field name="model">crm.call.tone</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="api_key_id" string="Agent" type="row"/>
+                <field name="tone_category" type="col"/>
+                <field name="tone_score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ─── Search ────────────────────────────────────────────────────── -->
+    <record id="view_crm_call_tone_search" model="ir.ui.view">
+        <field name="name">crm.call.tone.search</field>
+        <field name="model">crm.call.tone</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="api_key_id"/>
+                <field name="phone"/>
+                <field name="matched_partner_id"/>
+                <separator/>
+                <filter name="soft" string="Soft"
+                        domain="[('tone_label', '=', 'Soft')]"/>
+                <filter name="neutral" string="Neutral"
+                        domain="[('tone_label', '=', 'Neutral')]"/>
+                <filter name="hard" string="Hard"
+                        domain="[('tone_label', '=', 'Hard')]"/>
+                <separator/>
+                <filter name="today" string="Today"
+                        domain="[('call_date', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter name="this_week" string="This Week"
+                        domain="[('call_date', '&gt;=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter name="this_month" string="This Month"
+                        domain="[('call_date', '&gt;=', context_today().strftime('%Y-%m-01 00:00:00'))]"/>
+                <separator/>
+                <filter name="group_agent" string="Agent"
+                        context="{'group_by': 'api_key_id'}"/>
+                <filter name="group_tone" string="Tone"
+                        context="{'group_by': 'tone_category'}"/>
+                <filter name="group_date" string="Date"
+                        context="{'group_by': 'call_date:day'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ─── Actions ───────────────────────────────────────────────────── -->
+    <record id="action_crm_call_tone_all" model="ir.actions.act_window">
+        <field name="name">All Tones</field>
+        <field name="res_model">crm.call.tone</field>
+        <field name="view_mode">list,form,graph,pivot</field>
+        <field name="search_view_id" ref="view_crm_call_tone_search"/>
+    </record>
+
+    <record id="action_crm_call_tone_harsh" model="ir.actions.act_window">
+        <field name="name">Harsh Calls</field>
+        <field name="res_model">crm.call.tone</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_crm_call_tone_search"/>
+        <field name="domain">[('tone_label', '=', 'Hard')]</field>
+        <field name="context">{'search_default_today': 1}</field>
+    </record>
+
+</odoo>

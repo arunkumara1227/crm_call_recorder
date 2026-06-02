@@ -108,6 +108,20 @@ class CallRecording(models.Model):
         help='Last error message when transcription failed.',
     )
 
+    # ─── Tone analysis (reverse One2many to surface the analysis row) ──
+    tone_ids = fields.One2many(
+        'crm.call.tone', 'recording_id', string='Tone Analyses',
+    )
+    tone_label = fields.Char(
+        related='tone_ids.tone_label', string='Tone', readonly=True,
+    )
+    tone_score = fields.Integer(
+        related='tone_ids.tone_score', string='Tone Score', readonly=True,
+    )
+    tone_category = fields.Selection(
+        related='tone_ids.tone_category', string='Tone Category', readonly=True,
+    )
+
     company_id = fields.Many2one(
         'res.company', default=lambda self: self.env.company, index=True,
     )
@@ -312,6 +326,14 @@ class CallRecording(models.Model):
             })
         return True
 
+    def action_reanalyze_tone(self):
+        """Re-run tone analysis on demand (e.g. after admin edits keywords)."""
+        Tone = self.env['crm.call.tone']
+        for rec in self:
+            if rec.transcription_status == 'done' and rec.transcription_text:
+                Tone.create_or_update_for_recording(rec.id)
+        return True
+
     @api.model
     def _run_transcription_batch(self, limit=10):
         """Called by the cron. Picks up to `limit` pending rows and runs each
@@ -369,6 +391,15 @@ class CallRecording(models.Model):
                             'transcription_provider_used': result.get('provider') or config.transcription_provider,
                             'transcription_error': False,
                         })
+                        # Chain tone analysis off the successful transcript.
+                        # Inside the same savepoint — if it fails the transcript
+                        # write also rolls back, which is what we want.
+                        try:
+                            self.env['crm.call.tone'].create_or_update_for_recording(rec.id)
+                        except Exception as te:
+                            _logger.warning(
+                                "Tone analysis failed for row %s: %s", rec.id, te,
+                            )
                         done += 1
             except Exception as e:
                 _logger.exception("Transcription failed for row %s: %s", rec.id, e)

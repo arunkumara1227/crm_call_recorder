@@ -1,0 +1,127 @@
+"""Tone Report wizard — interactive dashboard with date + agent + phone filters.
+
+Ported from `whatsapp_employee_tracker.wa.tone.report` with two adaptations:
+- Filter dimension is `crm.call.api.key` ("Arun Infinx" etc.) instead of `hr.employee`.
+- Added optional `phone_contains` Char for ad-hoc narrowing within an agent's calls.
+
+Date-range bounds logic is verbatim from WA tracker.
+"""
+
+import datetime
+from datetime import timedelta
+
+from odoo import api, fields, models
+
+
+class CrmCallToneReport(models.TransientModel):
+    _name = 'crm.call.tone.report'
+    _description = 'CRM Call Tone Report'
+
+    api_key_id = fields.Many2one(
+        'crm.call.api.key', string='Agent (device)', required=True,
+        help='Which device/agent uploaded the calls. Created in '
+             'Call Recorder → API Keys.',
+    )
+    date_range = fields.Selection([
+        ('today',         'Today'),
+        ('yesterday',     'Yesterday'),
+        ('this_week',     'This Week'),
+        ('previous_week', 'Previous Week'),
+        ('this_month',    'This Month'),
+        ('last_month',    'Last Month'),
+        ('custom',        'Custom Range'),
+    ], string='Date Range', default='today', required=True)
+    date_from = fields.Date(string='From')
+    date_to = fields.Date(string='To')
+
+    phone_contains = fields.Char(
+        'Phone contains',
+        help='Optional. Narrow the report to calls whose number contains '
+             'these digits (e.g. last 5 digits of a contact).',
+    )
+
+    count_soft = fields.Integer(string='Soft / Polite', compute='_compute_counts')
+    count_neutral = fields.Integer(string='Neutral', compute='_compute_counts')
+    count_hard = fields.Integer(string='Hard / Critical', compute='_compute_counts')
+    count_total = fields.Integer(string='Total Analyzed', compute='_compute_counts')
+
+    @api.depends('api_key_id', 'date_range', 'date_from', 'date_to', 'phone_contains')
+    def _compute_counts(self):
+        Tone = self.env['crm.call.tone']
+        for rec in self:
+            if not rec.api_key_id:
+                rec.count_soft = rec.count_neutral = rec.count_hard = 0
+                rec.count_total = 0
+                continue
+            domain = rec._get_base_domain()
+            rec.count_soft = Tone.search_count(domain + [('tone_label', '=', 'Soft')])
+            rec.count_neutral = Tone.search_count(domain + [('tone_label', '=', 'Neutral')])
+            rec.count_hard = Tone.search_count(domain + [('tone_label', '=', 'Hard')])
+            rec.count_total = rec.count_soft + rec.count_neutral + rec.count_hard
+
+    def _get_date_bounds(self):
+        """Translate `date_range` into concrete `(from_date, to_date)`. Verbatim
+        from WA tracker's logic."""
+        self.ensure_one()
+        today = fields.Date.context_today(self)
+        dr = self.date_range or 'today'
+        if dr == 'today':
+            return today, today
+        if dr == 'yesterday':
+            y = today - timedelta(days=1)
+            return y, y
+        if dr == 'this_week':
+            start = today - timedelta(days=today.weekday())
+            return start, today
+        if dr == 'previous_week':
+            this_monday = today - timedelta(days=today.weekday())
+            return (
+                this_monday - timedelta(days=7),
+                this_monday - timedelta(days=1),
+            )
+        if dr == 'this_month':
+            return today.replace(day=1), today
+        if dr == 'last_month':
+            first_this = today.replace(day=1)
+            last_prev = first_this - timedelta(days=1)
+            return last_prev.replace(day=1), last_prev
+        if dr == 'custom':
+            return self.date_from, self.date_to
+        return today, today
+
+    def _get_base_domain(self):
+        self.ensure_one()
+        domain = [('api_key_id', '=', self.api_key_id.id)]
+        d_from, d_to = self._get_date_bounds()
+        if d_from:
+            start_dt = datetime.datetime.combine(d_from, datetime.time.min)
+            domain.append(('call_date', '>=', start_dt))
+        if d_to:
+            end_dt = datetime.datetime.combine(d_to, datetime.time.max)
+            domain.append(('call_date', '<=', end_dt))
+        if self.phone_contains:
+            digits = ''.join(c for c in (self.phone_contains or '') if c.isdigit())
+            if digits:
+                domain.append(('phone_digits', 'ilike', digits))
+        return domain
+
+    # ── Drill-down actions ───────────────────────────────────────────
+    def _open_tones(self, tone_label, display_name):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': f"{display_name} — {self.api_key_id.name}",
+            'res_model': 'crm.call.tone',
+            'view_mode': 'list,form',
+            'domain': self._get_base_domain() + [('tone_label', '=', tone_label)],
+            'target': 'current',
+        }
+
+    def action_view_soft(self):
+        return self._open_tones('Soft', 'Soft / Polite Calls')
+
+    def action_view_neutral(self):
+        return self._open_tones('Neutral', 'Neutral Calls')
+
+    def action_view_hard(self):
+        return self._open_tones('Hard', 'Hard / Critical Calls')

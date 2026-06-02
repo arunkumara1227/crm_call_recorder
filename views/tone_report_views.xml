@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_crm_call_tone_report_form" model="ir.ui.view">
+        <field name="name">crm.call.tone.report.form</field>
+        <field name="model">crm.call.tone.report</field>
+        <field name="arch" type="xml">
+            <form string="Tone Report">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Tone Report</h1>
+                        <p class="text-muted">
+                            Filter by agent + date. Click a tile to drill down
+                            into the matching calls.
+                        </p>
+                    </div>
+
+                    <group>
+                        <group string="Filters">
+                            <field name="api_key_id" options="{'no_create': True}"/>
+                            <field name="date_range"/>
+                            <field name="date_from"
+                                   invisible="date_range != 'custom'"
+                                   required="date_range == 'custom'"/>
+                            <field name="date_to"
+                                   invisible="date_range != 'custom'"
+                                   required="date_range == 'custom'"/>
+                            <field name="phone_contains"
+                                   placeholder="optional — narrows by digits"/>
+                        </group>
+                        <group string="Summary">
+                            <field name="count_total" string="Total analyzed"/>
+                        </group>
+                    </group>
+
+                    <separator string="Drill down"/>
+                    <div class="row mt-3">
+                        <div class="col-4 text-center">
+                            <button name="action_view_soft" type="object"
+                                    class="btn btn-success btn-block"
+                                    style="width:100%; padding:24px; font-size:1.1em;">
+                                <div style="font-size:2em;">😊</div>
+                                <div><strong>Soft / Polite</strong></div>
+                                <div style="font-size:1.5em;">
+                                    <field name="count_soft" readonly="1" nolabel="1"/>
+                                </div>
+                            </button>
+                        </div>
+                        <div class="col-4 text-center">
+                            <button name="action_view_neutral" type="object"
+                                    class="btn btn-warning btn-block"
+                                    style="width:100%; padding:24px; font-size:1.1em;">
+                                <div style="font-size:2em;">😐</div>
+                                <div><strong>Neutral</strong></div>
+                                <div style="font-size:1.5em;">
+                                    <field name="count_neutral" readonly="1" nolabel="1"/>
+                                </div>
+                            </button>
+                        </div>
+                        <div class="col-4 text-center">
+                            <button name="action_view_hard" type="object"
+                                    class="btn btn-danger btn-block"
+                                    style="width:100%; padding:24px; font-size:1.1em;">
+                                <div style="font-size:2em;">😡</div>
+                                <div><strong>Hard / Critical</strong></div>
+                                <div style="font-size:1.5em;">
+                                    <field name="count_hard" readonly="1" nolabel="1"/>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_crm_call_tone_report" model="ir.actions.act_window">
+        <field name="name">Tone Report</field>
+        <field name="res_model">crm.call.tone.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+</odoo>
