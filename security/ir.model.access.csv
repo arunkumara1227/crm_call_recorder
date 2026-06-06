@@ -9,3 +9,16 @@ access_crm_call_tone_keyword_user,crm.call.tone.keyword read user,model_crm_call
 access_crm_call_tone_user,crm.call.tone user,model_crm_call_tone,group_call_recorder_user,1,1,0,0
 access_crm_call_tone_manager,crm.call.tone manager,model_crm_call_tone,group_call_recorder_manager,1,1,1,1
 access_crm_call_tone_report_user,crm.call.tone.report user,model_crm_call_tone_report,group_call_recorder_user,1,1,1,1
+access_crm_call_device_summary_user,crm.call.device.summary read user,model_crm_call_device_summary,group_call_recorder_user,1,0,0,0
+access_crm_call_device_summary_manager,crm.call.device.summary read manager,model_crm_call_device_summary,group_call_recorder_manager,1,0,0,0
+access_wa_employee_session_all,wa.employee.session.all,model_wa_employee_session,,1,1,1,1
+access_wa_communication_log_all,wa.communication.log.all,model_wa_communication_log,,1,1,1,1
+access_wa_keyword_alert_rule_all,wa.keyword.alert.rule.all,model_wa_keyword_alert_rule,,1,1,1,1
+access_wa_keyword_alert_log_all,wa.keyword.alert.log.all,model_wa_keyword_alert_log,,1,1,1,1
+access_wa_conversation_all,wa.conversation.all,model_wa_conversation,,1,1,1,1
+access_wa_quality_score_all,wa.quality.score.all,model_wa_quality_score,,1,1,1,1
+access_wa_message_tone_all,wa.message.tone.all,model_wa_message_tone,,1,1,1,1
+access_wa_voice_config_all,wa.voice.config.all,model_wa_voice_config,,1,1,1,1
+access_wa_tone_report_all,wa.tone.report.all,model_wa_tone_report,,1,1,1,1
+access_wa_response_time_stat_all,wa.response.time.stat.all,model_wa_response_time_stat,,1,0,0,0
+access_wa_response_time_summary_all,wa.response.time.summary.all,model_wa_response_time_summary,,1,0,0,0

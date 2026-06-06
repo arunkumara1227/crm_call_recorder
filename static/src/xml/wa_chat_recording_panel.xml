@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- Inject a 3rd column on the right side of the wa_chat_split_view
+         layout, showing call recordings with the currently-selected contact. -->
+    <t t-name="crm_call_recorder.ChatViewCallRecordingsPanel"
+       t-inherit="crm_call_recorder.ChatView"
+       t-inherit-mode="extension">
+
+        <xpath expr="//div[hasclass('wa-chat-container')]" position="inside">
+            <div class="flex-shrink-0 crm-call-panel"
+                 t-if="state.selectedConvId"
+                 style="width: 350px; border-left: 1px solid #d1d7db; background: #efeae2; overflow-y: auto;">
+
+                <div class="p-3 border-bottom bg-white">
+                    <h6 class="mb-0">
+                        <i class="fa fa-microphone text-primary me-2"/>Call Recordings
+                    </h6>
+                    <small class="text-muted">
+                        <t t-if="state.callRecordingsLoading">Loading…</t>
+                        <t t-else=""><t t-esc="state.callRecordings.length"/> calls with this contact</t>
+                    </small>
+                </div>
+
+                <div class="p-2"
+                     t-if="!state.callRecordingsLoading and state.callRecordings.length === 0">
+                    <p class="text-center text-muted small mt-4">
+                        No phone calls with this contact yet.
+                    </p>
+                </div>
+
+                <div class="p-2"
+                     t-if="state.callRecordings.length > 0">
+                    <div t-foreach="state.callRecordings" t-as="rec" t-key="rec.id"
+                         class="mb-2 p-2 bg-white rounded shadow-sm crm-call-card">
+
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <small class="text-muted">
+                                <i class="fa fa-clock-o me-1"/>
+                                <t t-esc="rec.call_date"/>
+                            </small>
+                            <span t-attf-class="badge {{ rec.direction === 'incoming' ? 'bg-success' : (rec.direction === 'outgoing' ? 'bg-info' : 'bg-secondary') }}">
+                                <t t-esc="rec.direction"/>
+                            </span>
+                        </div>
+
+                        <div class="small mb-1">
+                            <span class="text-muted">
+                                <i class="fa fa-hourglass-half me-1"/>
+                                <t t-esc="rec.duration_display"/>
+                            </span>
+                            <t t-if="rec.tone_label">
+                                <span class="mx-1 text-muted">·</span>
+                                <span t-attf-class="badge {{ rec.tone_label === 'Hard' ? 'bg-danger' : (rec.tone_label === 'Soft' ? 'bg-success' : 'bg-secondary') }}">
+                                    <t t-esc="rec.tone_label"/>
+                                </span>
+                            </t>
+                        </div>
+
+                        <audio t-if="rec.has_audio"
+                               controls="controls" preload="none"
+                               style="width: 100%; height: 36px;">
+                            <source t-att-src="rec.audio_url"/>
+                        </audio>
+
+                        <details t-if="rec.transcript" class="mt-2">
+                            <summary class="small text-muted">
+                                Transcript
+                                <t t-if="rec.transcription_language">
+                                    (<t t-esc="rec.transcription_language"/>)
+                                </t>
+                            </summary>
+                            <p class="small mb-0 mt-1" t-esc="rec.transcript"/>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+
+    </t>
+
+</templates>

@@ -8,11 +8,34 @@
               sequence="60"
               groups="crm_call_recorder.group_call_recorder_user"/>
 
+    <!-- Open the standalone vanilla-JS web app at /calls (textile_pos pattern) -->
+    <record id="action_open_web_app" model="ir.actions.act_url">
+        <field name="name">Open Web App</field>
+        <field name="url">/calls</field>
+        <field name="target">new</field>
+    </record>
+    <menuitem id="menu_call_recorder_web_app"
+              name="Open Web App"
+              parent="menu_call_recorder_root"
+              action="action_open_web_app"
+              sequence="5"
+              groups="crm_call_recorder.group_call_recorder_user"/>
+
+    <!-- Communication Dashboard — device-aggregated kanban with per-device
+         stat buttons that link out to WA chat view / tones / logs / session. -->
     <menuitem id="menu_call_recordings"
-              name="Recordings"
+              name="Communication Dashboard"
+              parent="menu_call_recorder_root"
+              action="action_crm_call_device_summary"
+              sequence="10"
+              groups="crm_call_recorder.group_call_recorder_user"/>
+
+    <!-- Power-user view: original flat list of all recordings -->
+    <menuitem id="menu_call_recordings_flat"
+              name="All Recordings"
               parent="menu_call_recorder_root"
               action="action_crm_call_recording"
-              sequence="10"
+              sequence="11"
               groups="crm_call_recorder.group_call_recorder_user"/>
 
     <!-- Configuration submenu (manager-only) -->

@@ -92,7 +92,8 @@ class RecordingRepository(
         )
         val rowId = dao.insertIgnoreDuplicate(rec)
         return if (rowId > 0) {
-            Log.i(TAG, "Enqueued #$rowId: phone=$phone direction=$direction dur=${duration}s sim=${rec.simLabel} path=${file.absolutePath}")
+            val phoneMasked = if (phone.length >= 4) "***" + phone.takeLast(4) else "***"
+            Log.i(TAG, "Enqueued #$rowId: phone=$phoneMasked direction=$direction dur=${duration}s sim=${rec.simLabel} path=${file.absolutePath}")
             rowId
         } else null
     }

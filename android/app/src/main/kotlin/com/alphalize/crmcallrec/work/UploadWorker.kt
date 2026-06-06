@@ -72,7 +72,8 @@ class UploadWorker(
         repo.setStatus(id, RecordingEntity.STATUS_UPLOADING)
 
         val callDateStr = formatUtc(rec.callDateUtcMs)
-        Log.i(TAG, "Row $id: POST phone=${rec.phone} dir=${rec.direction} dur=${rec.durationSec}s date=$callDateStr")
+        val phoneMasked = if (rec.phone.length >= 4) "***" + rec.phone.takeLast(4) else "***"
+        Log.i(TAG, "Row $id: POST phone=$phoneMasked dir=${rec.direction} dur=${rec.durationSec}s date=$callDateStr")
 
         return try {
             val resp = api.upload(

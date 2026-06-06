@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- Message Tone: List View -->
+    <!-- ============================================================ -->
+    <record id="view_wa_message_tone_list" model="ir.ui.view">
+        <field name="name">wa.message.tone.list</field>
+        <field name="model">wa.message.tone</field>
+        <field name="arch" type="xml">
+            <list string="Message Tone Analysis"
+                  decoration-danger="tone_label == 'Hard'"
+                  decoration-success="tone_label == 'Soft'"
+                  default_order="message_date desc">
+                <field name="message_date" widget="datetime" string="Date"/>
+                <field name="employee_id" string="Employee"/>
+                <field name="message_text" string="Message" optional="show"/>
+                <field name="tone_label" string="Tone"
+                       widget="badge"
+                       decoration-danger="tone_label == 'Hard'"
+                       decoration-success="tone_label == 'Soft'"
+                       decoration-warning="tone_label == 'Neutral'"/>
+                <field name="tone_category" string="Category" optional="show"/>
+                <field name="tone_score" string="Score (0-100)"/>
+                <field name="sentiment_score" string="Sentiment" optional="show"/>
+                <field name="soft_keywords_found" string="Soft Keywords" optional="show"/>
+                <field name="hard_keywords_found" string="Hard Keywords" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Message Tone: Form View -->
+    <!-- ============================================================ -->
+    <record id="view_wa_message_tone_form" model="ir.ui.view">
+        <field name="name">wa.message.tone.form</field>
+        <field name="model">wa.message.tone</field>
+        <field name="arch" type="xml">
+            <form string="Message Tone Analysis" create="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="tone_label"
+                                   widget="badge"
+                                   decoration-danger="tone_label == 'Hard'"
+                                   decoration-success="tone_label == 'Soft'"
+                                   decoration-warning="tone_label == 'Neutral'"/>
+                            Tone
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Message Info">
+                            <field name="employee_id"/>
+                            <field name="message_date"/>
+                            <field name="communication_log_id" string="Log Entry"/>
+                        </group>
+                        <group string="Analysis Result">
+                            <field name="tone_category"/>
+                            <field name="tone_score" widget="progressbar"/>
+                            <field name="sentiment_score"/>
+                            <field name="sentiment_category"/>
+                        </group>
+                    </group>
+
+                    <group string="Message Content">
+                        <field name="message_text" nolabel="1" readonly="1"
+                               style="background:#f8f9fa; padding:10px; border-radius:6px;"/>
+                    </group>
+
+                    <group string="Keyword Detection">
+                        <group>
+                            <field name="soft_keywords_found" string="Soft (Polite) Keywords"/>
+                        </group>
+                        <group>
+                            <field name="hard_keywords_found" string="Hard (Harsh) Keywords"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Message Tone: Graph View (Bar Chart by Employee + Tone Category) -->
+    <!-- ============================================================ -->
+    <record id="view_wa_message_tone_graph" model="ir.ui.view">
+        <field name="name">wa.message.tone.graph</field>
+        <field name="model">wa.message.tone</field>
+        <field name="arch" type="xml">
+            <graph string="Tone Analysis by Employee" type="bar" stacked="True">
+                <field name="employee_id" type="row"/>
+                <field name="tone_category" type="col"/>
+                <field name="tone_score" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Message Tone: Pivot View (table breakdown) -->
+    <!-- ============================================================ -->
+    <record id="view_wa_message_tone_pivot" model="ir.ui.view">
+        <field name="name">wa.message.tone.pivot</field>
+        <field name="model">wa.message.tone</field>
+        <field name="arch" type="xml">
+            <pivot string="Tone Analysis" display_quantity="True">
+                <field name="employee_id" type="row"/>
+                <field name="tone_category" type="col"/>
+                <field name="tone_score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Action: Tone Chart (bar graph default) -->
+    <!-- ============================================================ -->
+    <record id="action_wa_tone_chart" model="ir.actions.act_window">
+        <field name="name">Tone Chart</field>
+        <field name="res_model">wa.message.tone</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="context">{"search_default_group_employee": 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No tone data yet. Send some messages to start analysis.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Action: Message Tone Analysis -->
+    <!-- ============================================================ -->
+    <record id="action_wa_message_tone" model="ir.actions.act_window">
+        <field name="name">Message Tone Analysis</field>
+        <field name="res_model">wa.message.tone</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_harsh', '=', False)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No tone analysis yet. Messages will be analyzed automatically.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action: All tone (no filter) -->
+    <record id="action_wa_message_tone_all" model="ir.actions.act_window">
+        <field name="name">All Message Tones</field>
+        <field name="res_model">wa.message.tone</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No tone analysis yet.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Individual Tone Report: grouped by employee, one row per person -->
+    <!-- ============================================================ -->
+    <record id="view_wa_tone_report_list" model="ir.ui.view">
+        <field name="name">wa.message.tone.report.list</field>
+        <field name="model">wa.message.tone</field>
+        <field name="arch" type="xml">
+            <list string="Tone Report by Employee"
+                  decoration-danger="tone_label == 'Hard'"
+                  decoration-success="tone_label == 'Soft'"
+                  decoration-warning="tone_label == 'Neutral'"
+                  create="false" delete="false">
+                <field name="employee_id" string="Employee"/>
+                <field name="message_date" string="Date"/>
+                <field name="message_text" string="Message"/>
+                <field name="tone_label" string="Tone"/>
+                <field name="tone_category" string="Category"/>
+                <field name="tone_score" string="Avg Score %"/>
+                <field name="sentiment_score" string="VADER Score"/>
+                <field name="soft_keywords_found" string="Soft Keywords"/>
+                <field name="hard_keywords_found" string="Hard Keywords"/>
+                <field name="is_harsh" string="Harsh"/>
+                <field name="is_polite" string="Polite"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action: Individual Tone Report (grouped by employee) -->
+    <record id="action_wa_tone_report" model="ir.actions.act_window">
+        <field name="name">Individual Tone Report</field>
+        <field name="res_model">wa.message.tone</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{"group_by": ["employee_id"]}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No tone records yet. Employee outgoing messages are analyzed automatically.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action: Harsh messages only -->
+    <record id="action_wa_message_tone_harsh" model="ir.actions.act_window">
+        <field name="name">Harsh Messages</field>
+        <field name="res_model">wa.message.tone</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_harsh', '=', True)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No harsh messages detected.
+            </p>
+        </field>
+    </record>
+
+</odoo>

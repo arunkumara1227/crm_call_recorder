@@ -1,6 +1,6 @@
 """Tone keyword rules — admin-editable lists of soft / hard / profanity words.
 
-Mirrors `whatsapp_employee_tracker.wa.keyword.alert.rule` but slimmer: we don't
+Mirrors `crm_call_recorder.wa.keyword.alert.rule` but slimmer: we don't
 need severity, alert log, or partner linkage — tone analysis just needs the
 match set per category. Three default rules are seeded via data/tone_keywords.xml
 on install; admin can add more or edit the seeds via Configuration.
@@ -10,6 +10,7 @@ import logging
 import re
 
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -40,6 +41,29 @@ class CrmCallToneKeyword(models.Model):
         ('regex', 'Regular Expression'),
     ], string='Match Type', default='contains', required=True)
     description = fields.Text('Description')
+
+    @api.constrains('match_type', 'keywords')
+    def _check_regex_keywords(self):
+        """Reject save when match_type='regex' and any line fails re.compile().
+        Prevents a silent neutral-tone bug: a broken regex skips ALL matches in
+        that rule, making real soft/hard signals invisible to analysts."""
+        for rule in self:
+            if rule.match_type != 'regex' or not rule.keywords:
+                continue
+            bad = []
+            for line in rule.keywords.strip().split('\n'):
+                pattern = line.strip()
+                if not pattern:
+                    continue
+                try:
+                    re.compile(pattern)
+                except re.error as exc:
+                    bad.append(f'{pattern!r} ({exc})')
+            if bad:
+                raise ValidationError(
+                    "Invalid regex pattern(s) in rule '%s':\n  - %s"
+                    % (rule.name, '\n  - '.join(bad))
+                )
 
     def _check_text(self, text):
         """Return list of keywords from this rule found in `text`."""

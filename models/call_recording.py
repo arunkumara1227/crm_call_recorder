@@ -47,6 +47,10 @@ class CallRecording(models.Model):
     has_recording = fields.Boolean(compute='_compute_recording_url',
                                    search='_search_has_recording')
     recording_size_kb = fields.Integer(compute='_compute_recording_url')
+    audio_player_html = fields.Html(
+        string='Player', compute='_compute_audio_player_html',
+        sanitize=False, readonly=True,
+    )
 
     state = fields.Selection([
         ('pending', 'Pending'),
@@ -157,7 +161,7 @@ class CallRecording(models.Model):
     def _compute_recording_url(self):
         for rec in self:
             att = rec.recording_attachment_id
-            if att:
+            if att and att.exists():
                 rec.recording_url = f'/web/content/{att.id}?download=true'
                 rec.has_recording = True
                 rec.recording_size_kb = (att.file_size or 0) // 1024
@@ -165,6 +169,20 @@ class CallRecording(models.Model):
                 rec.recording_url = False
                 rec.has_recording = False
                 rec.recording_size_kb = 0
+
+    @api.depends('recording_url', 'has_recording')
+    def _compute_audio_player_html(self):
+        for rec in self:
+            if rec.has_recording and rec.recording_url:
+                rec.audio_player_html = Markup(
+                    '<audio controls="controls" preload="metadata" '
+                    'style="width:100%; max-width:600px;">'
+                    '<source src="{}"/>'
+                    "Your browser doesn't support inline audio."
+                    '</audio>'
+                ).format(rec.recording_url)
+            else:
+                rec.audio_player_html = False
 
     def _search_has_recording(self, operator, value):
         if operator not in ('=', '!='):

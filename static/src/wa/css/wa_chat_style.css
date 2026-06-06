@@ -1,0 +1,86 @@
+/* WhatsApp-style single column kanban for conversations */
+.o_wa_chat_kanban .o_kanban_renderer,
+.o_wa_chat_kanban .o_kanban_ungrouped {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    padding: 0 !important;
+}
+
+.o_wa_chat_kanban .o_kanban_record {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-bottom: 1px solid #e9ecef !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    flex: none !important;
+}
+
+.o_wa_chat_kanban .o_kanban_record:hover {
+    background-color: #f0f2f5 !important;
+}
+
+.o_wa_chat_kanban .o_kanban_record > div {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+
+/* ============================================ */
+/* Employee Dashboard Kanban Card Rounded Corners */
+/* ============================================ */
+
+.o_kanban_mobile .o_kanban_record {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+
+/* ============================================ */
+/* WhatsApp Split Chat View Styles */
+/* ============================================ */
+
+.wa-chat-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Contact list item hover/active */
+.wa-contact-item:hover {
+    background-color: #f0f2f5 !important;
+}
+
+.wa-contact-active {
+    background-color: #f0f2f5 !important;
+}
+
+/* Message bubbles */
+.wa-msg-in {
+    background-color: #ffffff;
+    border-top-left-radius: 0 !important;
+}
+
+.wa-msg-out {
+    background-color: #d9fdd3;
+    border-top-right-radius: 0 !important;
+}
+
+/* Chat background pattern */
+.wa-right-panel {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4cfc6' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-color: #efeae2;
+}
+
+/* Scrollbar styling */
+.wa-contact-list::-webkit-scrollbar,
+.wa-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.wa-contact-list::-webkit-scrollbar-thumb,
+.wa-messages::-webkit-scrollbar-thumb {
+    background-color: #cccccc;
+    border-radius: 3px;
+}

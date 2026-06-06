@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- Communication Log: List View -->
+    <!-- ============================================================ -->
+    <record id="view_wa_communication_log_list" model="ir.ui.view">
+        <field name="name">wa.communication.log.list</field>
+        <field name="model">wa.communication.log</field>
+        <field name="arch" type="xml">
+            <list string="Communication Log"
+                   default_order="message_date desc, id desc"
+                   decoration-info="direction == 'outgoing'"
+                   decoration-success="direction == 'incoming'"
+                   decoration-danger="is_flagged == True">
+                <field name="message_date" widget="datetime"/>
+                <field name="employee_id" widget="many2one_avatar_employee"/>
+                <field name="department_id" optional="hide"/>
+                <field name="direction"
+                       widget="badge"
+                       decoration-info="direction == 'outgoing'"
+                       decoration-success="direction == 'incoming'"/>
+                <field name="phone"/>
+                <field name="partner_id"/>
+                <field name="message_text" widget="text"/>
+                <field name="word_count" optional="hide"/>
+                <field name="status"
+                       widget="badge"
+                       decoration-success="status in ('sent', 'delivered', 'read', 'received')"
+                       decoration-danger="status == 'failed'"/>
+                <field name="is_flagged"
+                       widget="boolean"
+                       optional="show"/>
+                <field name="flag_reason" optional="hide"/>
+                <field name="has_attachment" widget="boolean" optional="hide"/>
+                <field name="is_group_message" widget="boolean" optional="hide"/>
+                <field name="is_voice_message" widget="boolean" optional="show" string="🎤 Voice"/>
+                <field name="voice_language" optional="show" string="Lang"/>
+                <field name="voice_transcription" optional="show" string="Transcription"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Communication Log: Form View -->
+    <!-- ============================================================ -->
+    <record id="view_wa_communication_log_form" model="ir.ui.view">
+        <field name="name">wa.communication.log.form</field>
+        <field name="model">wa.communication.log</field>
+        <field name="arch" type="xml">
+            <form string="Communication Log Entry" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group string="Message Details">
+                            <field name="message_date"/>
+                            <field name="direction"/>
+                            <field name="status"/>
+                            <field name="phone"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group string="Employee">
+                            <field name="employee_id"/>
+                            <field name="department_id"/>
+                            <field name="conversation_id"/>
+                            <field name="word_count"/>
+                        </group>
+                    </group>
+                    <group string="Message Content">
+                        <field name="message_text" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Flags" invisible="not is_flagged">
+                        <field name="is_flagged"/>
+                        <field name="flag_reason"/>
+                    </group>
+                    <group string="Voice Message" invisible="not is_voice_message">
+                        <field name="is_voice_message"/>
+                        <field name="voice_language"/>
+                        <field name="voice_transcription" nolabel="1" colspan="2" readonly="1"
+                               style="background:#f0f8ff; padding:10px; border-radius:6px;"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Communication Log: Search View -->
+    <!-- ============================================================ -->
+    
+
+    <!-- ============================================================ -->
+    <!-- Communication Log: Pivot View -->
+    <!-- ============================================================ -->
+    <record id="view_wa_communication_log_pivot" model="ir.ui.view">
+        <field name="name">wa.communication.log.pivot</field>
+        <field name="model">wa.communication.log</field>
+        <field name="arch" type="xml">
+            <pivot string="Communication Analysis">
+                <field name="employee_id" type="row"/>
+                <field name="direction" type="col"/>
+                <field name="word_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Communication Log: Graph View -->
+    <!-- ============================================================ -->
+    <record id="view_wa_communication_log_graph" model="ir.ui.view">
+        <field name="name">wa.communication.log.graph</field>
+        <field name="model">wa.communication.log</field>
+        <field name="arch" type="xml">
+            <graph string="Communication Stats" type="bar">
+                <field name="employee_id"/>
+                <field name="direction" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Action -->
+    <!-- ============================================================ -->
+    <record id="action_wa_communication_log" model="ir.actions.act_window">
+        <field name="name">Communication Log</field>
+        <field name="res_model">wa.communication.log</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="context">{'list_view_default_order': 'message_date desc, id desc'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No messages tracked yet
+            </p>
+            <p>
+                Messages from monitored employee sessions will appear here
+                after the next sync cycle (every 5 minutes).
+            </p>
+        </field>
+    </record>
+
+
+    <!-- ============================================================ -->
+    <!-- Voice Messages: dedicated list view -->
+    <!-- ============================================================ -->
+    <record id="view_wa_voice_messages_list" model="ir.ui.view">
+        <field name="name">wa.communication.log.voice.list</field>
+        <field name="model">wa.communication.log</field>
+        <field name="arch" type="xml">
+            <list string="Voice Messages"
+                  decoration-info="direction == 'outgoing'"
+                  decoration-success="direction == 'incoming'"
+                  create="false" delete="false">
+                <field name="message_date" widget="datetime" string="Date"/>
+                <field name="employee_id" widget="many2one_avatar_employee" string="Employee"/>
+                <field name="direction" widget="badge"
+                       decoration-info="direction == 'outgoing'"
+                       decoration-success="direction == 'incoming'"/>
+                <field name="phone" string="Contact"/>
+                <field name="voice_language" string="Language"/>
+                <field name="voice_transcription" string="Transcription"/>
+                <field name="message_text" string="Full Message" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action: Voice Messages -->
+    <record id="action_wa_voice_messages" model="ir.actions.act_window">
+        <field name="name">Voice Messages</field>
+        <field name="res_model">wa.communication.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="views">[(ref('view_wa_voice_messages_list'), 'list'), (False, 'form')]</field>
+        <field name="domain">[('is_voice_message', '=', True)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No voice messages yet. Voice notes sent via WhatsApp will be
+                automatically transcribed and appear here.
+            </p>
+        </field>
+    </record>
+
+</odoo>

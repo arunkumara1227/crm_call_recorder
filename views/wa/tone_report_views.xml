@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_wa_tone_report_form" model="ir.ui.view">
+        <field name="name">wa.tone.report.form</field>
+        <field name="model">wa.tone.report</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="true" duplicate="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Tone Report</h1>
+                        <p class="text-muted">
+                            Pick an employee and a time range. Click a
+                            category tile to drill into the individual
+                            messages.
+                        </p>
+                    </div>
+
+                    <group>
+                        <group string="Filters">
+                            <field name="employee_id"/>
+                            <field name="date_range"/>
+                            <field name="date_from"
+                                   invisible="date_range != 'custom'"
+                                   required="date_range == 'custom'"/>
+                            <field name="date_to"
+                                   invisible="date_range != 'custom'"
+                                   required="date_range == 'custom'"/>
+                        </group>
+                        <group string="Summary">
+                            <field name="count_total" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <separator string="Message Categories"/>
+
+                    <div class="row mt-3" style="display: flex; gap: 16px; flex-wrap: wrap;">
+                        <button name="action_view_soft"
+                                type="object"
+                                class="btn btn-success"
+                                style="flex: 1 1 30%; min-height: 140px; padding: 24px; text-align: center;">
+                            <div style="font-size: 18px; font-weight: 600;">
+                                🟢 Soft / Polite
+                            </div>
+                            <div style="font-size: 48px; font-weight: 700; margin-top: 8px;">
+                                <field name="count_soft" readonly="1" nolabel="1"/>
+                            </div>
+                            <div style="font-size: 12px; opacity: 0.8;">
+                                Click to see messages
+                            </div>
+                        </button>
+
+                        <button name="action_view_neutral"
+                                type="object"
+                                class="btn btn-secondary"
+                                style="flex: 1 1 30%; min-height: 140px; padding: 24px; text-align: center;">
+                            <div style="font-size: 18px; font-weight: 600;">
+                                ⚪ Neutral
+                            </div>
+                            <div style="font-size: 48px; font-weight: 700; margin-top: 8px;">
+                                <field name="count_neutral" readonly="1" nolabel="1"/>
+                            </div>
+                            <div style="font-size: 12px; opacity: 0.8;">
+                                Click to see messages
+                            </div>
+                        </button>
+
+                        <button name="action_view_hard"
+                                type="object"
+                                class="btn btn-danger"
+                                style="flex: 1 1 30%; min-height: 140px; padding: 24px; text-align: center;">
+                            <div style="font-size: 18px; font-weight: 600;">
+                                🔴 Hard / Critical
+                            </div>
+                            <div style="font-size: 48px; font-weight: 700; margin-top: 8px;">
+                                <field name="count_hard" readonly="1" nolabel="1"/>
+                            </div>
+                            <div style="font-size: 12px; opacity: 0.8;">
+                                Click to see messages
+                            </div>
+                        </button>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wa_tone_report_wizard" model="ir.actions.act_window">
+        <field name="name">Tone Report</field>
+        <field name="res_model">wa.tone.report</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_wa_tone_report_form"/>
+        <field name="target">current</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- Conversations: Kanban View (WhatsApp-like contact list) -->
+    <!-- ============================================================ -->
+    <record id="view_wa_conversation_kanban" model="ir.ui.view">
+        <field name="name">wa.conversation.kanban</field>
+        <field name="model">wa.conversation</field>
+        <field name="arch" type="xml">
+            <kanban default_order="last_message_date desc"
+                    class="o_wa_chat_kanban"
+                    group_create="false" group_delete="false" group_edit="false"
+                    sample="1">
+                <field name="employee_id"/>
+                <field name="contact_name"/>
+                <field name="phone"/>
+                <field name="total_messages"/>
+                <field name="sent_count"/>
+                <field name="received_count"/>
+                <field name="avg_response_minutes"/>
+                <field name="avg_tone_score"/>
+                <field name="tone_label"/>
+                <field name="last_message_date"/>
+                <field name="is_active_today"/>
+                <field name="last_message_preview"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex align-items-center px-3 py-2" style="border-bottom: 1px solid #e9ecef; cursor:pointer;">
+                            <!-- Green Circle Avatar -->
+                            <div class="flex-shrink-0 me-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:50px; height:50px; background-color:#00a884; color:white; font-size:20px; font-weight:500;">
+                                    <i class="fa fa-user"/>
+                                </div>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="flex-grow-1 min-w-0">
+                                <!-- Row 1: Name + Time -->
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <span class="fw-bold text-truncate" style="font-size:16px; color:#111b21;">
+                                        <field name="contact_name"/>
+                                    </span>
+                                    <small class="text-muted flex-shrink-0 ms-2" style="font-size:12px;">
+                                        <field name="last_message_date" widget="relative"/>
+                                    </small>
+                                </div>
+
+                                <!-- Row 2: Last message preview + badges -->
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <span class="text-muted text-truncate" style="font-size:13px; max-width:70%;">
+                                        <field name="last_message_preview"/>
+                                    </span>
+                                    <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-2">
+                                        <span t-if="record.is_active_today.raw_value"
+                                              class="badge rounded-pill"
+                                              style="background-color:#25d366; font-size:10px;">
+                                            Active
+                                        </span>
+                                        <span t-if="record.tone_label.raw_value == 'Soft'"
+                                              class="badge rounded-pill"
+                                              style="background-color:#28a745; font-size:10px;">
+                                            Soft
+                                        </span>
+                                        <span t-if="record.tone_label.raw_value == 'Hard'"
+                                              class="badge rounded-pill"
+                                              style="background-color:#dc3545; font-size:10px;">
+                                            Hard
+                                        </span>
+                                        <span class="badge rounded-pill bg-secondary" style="font-size:10px;">
+                                            <field name="total_messages"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Conversations: List View -->
+    <!-- ============================================================ -->
+    <record id="view_wa_conversation_list" model="ir.ui.view">
+        <field name="name">wa.conversation.list</field>
+        <field name="model">wa.conversation</field>
+        <field name="arch" type="xml">
+            <list string="Chats"
+                   decoration-success="is_active_today == True"
+                   default_order="last_message_date desc">
+                <field name="contact_name" string="Name"/>
+                <field name="phone" string="Phone"/>
+                <field name="total_messages" string="Msgs"/>
+                <field name="sent_count" string="Sent"/>
+                <field name="received_count" string="Recv"/>
+                <field name="avg_response_minutes" string="Resp Time (min)"/>
+                <field name="tone_label" string="Tone"
+                       widget="badge"
+                       decoration-danger="tone_label == 'Hard'"
+                       decoration-success="tone_label == 'Soft'"
+                       decoration-warning="tone_label == 'Neutral'"/>
+                <field name="avg_tone_score" string="Tone Score" optional="show"/>
+                <field name="last_message_date" widget="relative" string="Last Active"/>
+                <field name="is_active_today" widget="boolean" string="Active"/>
+                <field name="employee_id" optional="hide"/>
+                <field name="department_id" optional="hide"/>
+                <field name="partner_id" optional="hide"/>
+                <field name="first_message_date" widget="date" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Conversations: Form View (Chat-style) -->
+    <!-- ============================================================ -->
+    <record id="view_wa_conversation_form" model="ir.ui.view">
+        <field name="name">wa.conversation.form</field>
+        <field name="model">wa.conversation</field>
+        <field name="arch" type="xml">
+            <form string="Conversation Thread" create="false">
+                <header>
+                    <button name="action_view_messages"
+                            string="View All Messages"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-comments"/>
+                    <button name="action_refresh_stats"
+                            string="Refresh Stats"
+                            type="object"
+                            icon="fa-refresh"/>
+                </header>
+                <sheet>
+                    <!-- Contact Header -->
+                    <div class="oe_title">
+                        <h1>
+                            <i class="fa fa-whatsapp text-success me-2"/>
+                            <field name="contact_name"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Contact Info">
+                            <field name="phone" widget="phone"/>
+                            <field name="partner_id"/>
+                            <field name="employee_id"/>
+                            <field name="department_id"/>
+                        </group>
+                        <group string="Conversation Stats">
+                            <field name="total_messages"/>
+                            <field name="sent_count" string="Sent"/>
+                            <field name="received_count" string="Received"/>
+                            <field name="avg_response_minutes" string="Avg Response Time (min)"/>
+                            <field name="tone_label" string="Employee Tone"
+                                   widget="badge"
+                                   decoration-danger="tone_label == 'Hard'"
+                                   decoration-success="tone_label == 'Soft'"
+                                   decoration-warning="tone_label == 'Neutral'"/>
+                            <field name="avg_tone_score" string="Avg Tone Score (0-100)"/>
+                            <field name="first_message_date"/>
+                            <field name="last_message_date"/>
+                        </group>
+                    </group>
+
+                    <!-- Chat Messages -->
+                    <notebook>
+                        <page string="Chat Messages" name="messages">
+                            <field name="log_ids" readonly="1">
+                                <list decoration-info="direction == 'outgoing'"
+                                       decoration-success="direction == 'incoming'"
+                                       decoration-danger="is_flagged == True"
+                                       default_order="message_date asc">
+                                    <field name="message_date" widget="datetime"/>
+                                    <field name="direction"
+                                           widget="badge"
+                                           decoration-info="direction == 'outgoing'"
+                                           decoration-success="direction == 'incoming'"/>
+                                    <field name="message_text"/>
+                                    <field name="status" widget="badge"/>
+                                    <field name="is_flagged" widget="boolean"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Action: Conversations (Kanban first) -->
+    <!-- ============================================================ -->
+    <record id="action_wa_conversation" model="ir.actions.act_window">
+        <field name="name">Conversations</field>
+        <field name="res_model">wa.conversation</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No conversations tracked yet
+            </p>
+        </field>
+    </record>
+
+</odoo>

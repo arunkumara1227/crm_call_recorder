@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- WhatsApp Split Chat View (Client Action) -->
+    <record id="action_wa_chat_split" model="ir.actions.client">
+        <field name="name">Chat View</field>
+        <field name="tag">wa_chat_split_view</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Chat View: Communication Log views -->
+    <!-- ============================================================ -->
+
+    <!-- Chat List View - message thread style -->
+    <record id="view_wa_chat_list" model="ir.ui.view">
+        <field name="name">wa.communication.log.chat</field>
+        <field name="model">wa.communication.log</field>
+        <field name="arch" type="xml">
+            <list string="Chat Messages"
+                   decoration-info="direction == 'outgoing'"
+                   decoration-success="direction == 'incoming'"
+                   decoration-danger="is_flagged == True"
+                   default_order="message_date asc">
+                <field name="message_date" widget="datetime" string="Time"/>
+                <field name="employee_id" string="Employee"/>
+                <field name="phone" string="Contact"/>
+                <field name="direction"
+                       widget="badge"
+                       decoration-info="direction == 'outgoing'"
+                       decoration-success="direction == 'incoming'"/>
+                <field name="message_text" string="Message"/>
+                <field name="status"
+                       widget="badge"
+                       decoration-success="status in ('sent', 'delivered', 'read', 'received')"
+                       decoration-danger="status == 'failed'"/>
+                <field name="is_flagged" widget="boolean" string="Flagged" optional="show"/>
+                <field name="conversation_id" string="Thread" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Chat Kanban View - message cards -->
+    <record id="view_wa_chat_kanban" model="ir.ui.view">
+        <field name="name">wa.communication.log.chat.kanban</field>
+        <field name="model">wa.communication.log</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile o_wa_chat_kanban" default_order="message_date asc" records_draggable="false">
+                <field name="employee_id"/>
+                <field name="phone"/>
+                <field name="direction"/>
+                <field name="message_text"/>
+                <field name="message_date"/>
+                <field name="status"/>
+                <field name="is_flagged"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="d-flex w-100 my-1 #{record.direction.raw_value == 'outgoing' ? 'justify-content-end' : 'justify-content-start'}">
+                            <div t-attf-class="p-2 px-3 rounded-3 shadow-sm #{record.direction.raw_value == 'outgoing' ? 'bg-success-subtle text-dark' : 'bg-white text-dark border'}"
+                                 style="max-width: 70%; min-width: 120px; word-wrap: break-word;">
+                                <div class="small text-muted mb-1" t-if="record.direction.raw_value == 'incoming'">
+                                    <strong><field name="phone"/></strong>
+                                </div>
+                                <div style="white-space: pre-wrap;">
+                                    <field name="message_text"/>
+                                </div>
+                                <div class="d-flex justify-content-end align-items-center mt-1" style="gap: 4px;">
+                                    <small t-if="record.is_flagged.raw_value" class="text-danger">
+                                        <i class="fa fa-flag"/>
+                                    </small>
+                                    <small class="text-muted" style="font-size: 10px;">
+                                        <field name="message_date" widget="relative"/>
+                                    </small>
+                                    <small t-if="record.direction.raw_value == 'outgoing'" class="text-muted" style="font-size: 10px;">
+                                        <i t-attf-class="fa #{record.status.raw_value == 'sent' ? 'fa-check' : (record.status.raw_value == 'delivered' ? 'fa-check-double' : 'fa-clock-o')}"/>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Chat Action -->
+    <record id="action_wa_chat_view" model="ir.actions.act_window">
+        <field name="name">Chat View</field>
+        <field name="res_model">wa.communication.log</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No messages yet
+            </p>
+            <p>Messages will appear here in real-time as employees send and receive WhatsApp messages.</p>
+        </field>
+    </record>
+
+</odoo>

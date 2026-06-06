@@ -9,6 +9,7 @@
             <list decoration-muted="not active">
                 <field name="name"/>
                 <field name="user_id"/>
+                <field name="employee_id" optional="show"/>
                 <field name="key_prefix"/>
                 <field name="recording_count" string="Uploads"/>
                 <field name="last_used"/>
@@ -37,6 +38,7 @@
                     <group>
                         <group string="Identity">
                             <field name="user_id"/>
+                            <field name="employee_id"/>
                             <field name="active"/>
                             <field name="expires_at"/>
                             <field name="company_id" groups="base.group_multi_company"/>

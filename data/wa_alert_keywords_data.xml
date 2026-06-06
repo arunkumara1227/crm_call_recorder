@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Policy Violation Keywords -->
+        <record id="rule_policy_salary" model="wa.keyword.alert.rule">
+            <field name="name">Salary / Compensation Discussion</field>
+            <field name="keywords">salary details
+salary slip
+my salary
+ctc details
+salary structure
+pay slip
+compensation details</field>
+            <field name="severity">medium</field>
+            <field name="match_type">contains</field>
+            <field name="category">policy</field>
+            <field name="description">Flag messages discussing salary or compensation details externally.</field>
+        </record>
+
+        <record id="rule_policy_confidential" model="wa.keyword.alert.rule">
+            <field name="name">Confidential Information</field>
+            <field name="keywords">confidential
+do not share
+secret
+classified
+internal only
+restricted</field>
+            <field name="severity">high</field>
+            <field name="match_type">exact_word</field>
+            <field name="category">data_leak</field>
+            <field name="description">Flag potential sharing of confidential information.</field>
+        </record>
+
+        <!-- Competitor Mentions -->
+        <record id="rule_competitor" model="wa.keyword.alert.rule">
+            <field name="name">Competitor Mentions</field>
+            <field name="keywords">competitor
+other company offer
+job offer
+interview
+recruitment
+better offer</field>
+            <field name="severity">medium</field>
+            <field name="match_type">contains</field>
+            <field name="category">competitor</field>
+            <field name="description">Track mentions of competitors or external job offers.</field>
+        </record>
+
+        <!-- Customer Complaints -->
+        <record id="rule_complaint" model="wa.keyword.alert.rule">
+            <field name="name">Customer Complaints</field>
+            <field name="keywords">very angry
+not satisfied
+worst service
+complaint
+escalate
+legal action
+refund
+cancel order
+very disappointed</field>
+            <field name="severity">high</field>
+            <field name="match_type">contains</field>
+            <field name="category">complaint</field>
+            <field name="description">Flag customer complaint messages for manager attention.</field>
+        </record>
+
+        <!-- Profanity / Inappropriate -->
+        <record id="rule_profanity" model="wa.keyword.alert.rule">
+            <field name="name">Inappropriate Language</field>
+            <field name="keywords">damn
+stupid
+idiot
+hate
+useless
+rubbish
+nonsense</field>
+            <field name="severity">medium</field>
+            <field name="match_type">exact_word</field>
+            <field name="category">profanity</field>
+            <field name="description">Flag unprofessional language in communications.</field>
+        </record>
+
+        <!-- Data Leak Risk -->
+        <record id="rule_data_leak" model="wa.keyword.alert.rule">
+            <field name="name">Data Sharing Risk</field>
+            <field name="keywords">password
+login credentials
+bank account
+credit card
+pan card
+aadhaar
+passport number
+database access
+server password
+admin access</field>
+            <field name="severity">critical</field>
+            <field name="match_type">contains</field>
+            <field name="category">data_leak</field>
+            <field name="description">Critical alert for sharing of sensitive credentials or personal data.</field>
+        </record>
+
+        <!-- Soft Language: Polite / Friendly Tone -->
+        <record id="rule_soft_language" model="wa.keyword.alert.rule">
+            <field name="name">Soft / Polite Language</field>
+            <field name="keywords">please
+thank you
+thanks
+apologies
+sorry
+kindly
+appreciate
+happy to help
+let me help
+of course
+certainly
+absolutely
+no problem
+my pleasure
+warm regards
+hope you are doing well
+understand your concern
+i understand
+we will take care
+with pleasure
+glad to assist
+looking forward
+feel free
+i apologize
+we appreciate
+have a great day
+hope this helps
+best regards
+sure thing
+not at all
+welcome</field>
+            <field name="severity">low</field>
+            <field name="match_type">contains</field>
+            <field name="category">soft_language</field>
+            <field name="description">Detects polite and friendly language used by employees with clients.</field>
+        </record>
+
+        <!-- Hard Language: Harsh / Dismissive Tone -->
+        <record id="rule_hard_language" model="wa.keyword.alert.rule">
+            <field name="name">Hard / Harsh Language</field>
+            <field name="keywords">not my problem
+figure it out
+not possible
+i already told you
+don't bother
+as i said
+that's not how it works
+you are wrong
+you don't understand
+impossible
+no way
+i can't do anything
+don't disturb
+stop messaging
+i told you already
+read the instructions
+not my fault
+deal with it
+i don't care
+whatever
+just no
+obviously
+clearly you don't
+this is ridiculous
+stop wasting my time</field>
+            <field name="severity">medium</field>
+            <field name="match_type">contains</field>
+            <field name="category">hard_language</field>
+            <field name="description">Detects harsh or dismissive language used by employees with clients.</field>
+        </record>
+
+    </data>
+</odoo>

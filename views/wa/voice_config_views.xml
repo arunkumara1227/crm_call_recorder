@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_wa_voice_config_form" model="ir.ui.view">
+        <field name="name">wa.voice.config.form</field>
+        <field name="model">wa.voice.config</field>
+        <field name="arch" type="xml">
+            <form string="Voice Transcription Settings">
+                <sheet>
+                    <group string="Output Language">
+                        <field name="translate_to_english" widget="boolean_toggle"/>
+                        <p class="text-muted">
+                            ON: voice notes in any language are transcribed AS English
+                            (e.g. Tamil "வணக்கம்" → "Welcome"). The detected source
+                            language is still recorded on the message for audit.
+                            OFF: original-language transcription only.
+                        </p>
+                    </group>
+
+                    <group string="Transcription Provider">
+                        <field name="transcription_provider" widget="radio"/>
+                    </group>
+
+                    <group string="Google Gemini Settings"
+                           invisible="transcription_provider != 'gemini'">
+                        <field name="gemini_api_key"
+                               password="True"
+                               placeholder="AIzaSy..."/>
+                        <field name="gemini_model"/>
+                        <field name="gemini_custom_model"
+                               placeholder="e.g. gemini-3-flash-preview"
+                               invisible="gemini_model != 'custom'"/>
+                        <p class="text-muted">
+                            Get API key at ai.google.dev
+                        </p>
+                    </group>
+
+                    <group string="Groq Settings (Free)"
+                           invisible="transcription_provider != 'groq'">
+                        <field name="groq_api_key"
+                               password="True"
+                               placeholder="gsk_..."/>
+                        <field name="groq_model"
+                               placeholder="e.g. whisper-large-v3"/>
+                        <p class="text-muted">
+                            Free tier: 2 hours of audio/day. Uses Whisper Large V3.
+                            Excellent Malayalam support. Get API key at console.groq.com
+                        </p>
+                    </group>
+
+                    <group string="OpenAI Whisper Settings"
+                           invisible="transcription_provider != 'openai'">
+                        <field name="openai_api_key"
+                               password="True"
+                               placeholder="sk-..."/>
+                        <field name="openai_model"/>
+                        <p class="text-muted">
+                            Paid: Whisper-1 ~$0.006/min. GPT-4o Transcribe is most accurate.
+                            Get API key at platform.openai.com
+                        </p>
+                    </group>
+
+                    <group string="Status" invisible="not status_message">
+                        <field name="status_message" readonly="1"/>
+                    </group>
+
+                    <footer>
+                        <button string="Save &amp; Apply" name="action_save_config"
+                                type="object" class="btn-primary"/>
+                        <button string="Test Connection" name="action_test_connection"
+                                type="object" class="btn-secondary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wa_voice_config" model="ir.actions.server">
+        <field name="name">Voice Transcription Settings</field>
+        <field name="model_id" ref="model_wa_voice_config"/>
+        <field name="state">code</field>
+        <field name="code">
+config = env['wa.voice.config'].sudo().get_config()
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Voice Transcription Settings',
+    'res_model': 'wa.voice.config',
+    'view_mode': 'form',
+    'res_id': config.id,
+    'target': 'current',
+    'context': {'form_view_initial_mode': 'edit'},
+}
+        </field>
+    </record>
+
+</odoo>

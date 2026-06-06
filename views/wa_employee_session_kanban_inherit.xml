@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Append a "Phone Calls" stat block to each card in the
+         existing Employee Dashboard kanban (action_wa_tracker_dashboard). -->
+    <record id="view_wa_employee_session_kanban_calls_inherit" model="ir.ui.view">
+        <field name="name">wa.employee.session.kanban.crm_call_recorder.inherit</field>
+        <field name="model">wa.employee.session</field>
+        <field name="inherit_id" ref="crm_call_recorder.view_wa_employee_session_kanban"/>
+        <field name="arch" type="xml">
+
+            <!-- Make the new fields available to the kanban so groups + sorts work -->
+            <xpath expr="//templates" position="before">
+                <field name="total_call_recordings"/>
+                <field name="calls_today_in"/>
+                <field name="calls_today_out"/>
+                <field name="harsh_calls_count"/>
+                <field name="call_avg_tone_score"/>
+                <field name="avg_call_duration_sec"/>
+                <field name="last_call_at"/>
+            </xpath>
+
+            <!-- Append a divider + 4-stat block + summary row to every card -->
+            <xpath expr="//div[hasclass('d-flex', 'flex-column', 'p-2')]" position="inside">
+
+                <hr class="my-1"/>
+                <div class="text-muted small mb-1 mt-1 px-1">
+                    <i class="fa fa-microphone text-primary me-1"/>
+                    <strong>Phone Calls</strong>
+                </div>
+
+                <div class="d-flex justify-content-between mb-1 px-1">
+                    <div class="text-center">
+                        <div class="fw-bold text-primary fs-5"><field name="total_call_recordings"/></div>
+                        <div class="text-muted small">Total</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="fw-bold text-info fs-5"><field name="calls_today_out"/></div>
+                        <div class="text-muted small">Out today</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="fw-bold text-success fs-5"><field name="calls_today_in"/></div>
+                        <div class="text-muted small">In today</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="fw-bold text-danger fs-5"><field name="harsh_calls_count"/></div>
+                        <div class="text-muted small">Harsh</div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between px-1 mt-1">
+                    <div class="small">
+                        <i class="fa fa-star text-warning me-1"/>
+                        <span class="fw-bold"><field name="call_avg_tone_score"/></span>/100 tone
+                    </div>
+                    <div class="small">
+                        <i class="fa fa-clock-o text-muted me-1"/>
+                        <span class="fw-bold"><field name="avg_call_duration_sec"/></span>s avg
+                    </div>
+                </div>
+
+                <div class="text-muted small mt-1 text-end">
+                    <i class="fa fa-phone me-1"/>
+                    Last call: <field name="last_call_at" widget="relative"/>
+                </div>
+
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

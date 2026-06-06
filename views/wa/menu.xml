@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Top-level CRM WhatsApp section, nested under Sales > Call Recorder -->
+    <menuitem id="menu_wa_tracker_root"
+              name="CRM WhatsApp"
+              parent="crm_call_recorder.menu_call_recorder_root"
+              sequence="40"/>
+
+    <!-- ─── Dashboard ──────────────────────────────────────────────── -->
+    <menuitem id="menu_wa_tracker_dashboard"
+              name="Dashboard"
+              parent="menu_wa_tracker_root"
+              sequence="1"/>
+
+    <menuitem id="menu_wa_dashboard_overview"
+              name="Employee Overview"
+              parent="menu_wa_tracker_dashboard"
+              action="action_wa_tracker_dashboard"
+              sequence="1"/>
+
+    <!-- ─── Monitoring ─────────────────────────────────────────────── -->
+    <menuitem id="menu_wa_tracker_monitoring"
+              name="Monitoring"
+              parent="menu_wa_tracker_root"
+              sequence="2"/>
+
+    <menuitem id="menu_wa_chat_view"
+              name="Chat View"
+              parent="menu_wa_tracker_monitoring"
+              action="action_wa_chat_split"
+              sequence="1"/>
+
+    <menuitem id="menu_wa_conversations"
+              name="Conversations"
+              parent="menu_wa_tracker_monitoring"
+              action="action_wa_conversation"
+              sequence="2"/>
+
+    <menuitem id="menu_wa_communication_log"
+              name="Communication Log"
+              parent="menu_wa_tracker_monitoring"
+              action="action_wa_communication_log"
+              sequence="3"/>
+
+    <menuitem id="menu_wa_voice_messages"
+              name="Voice Messages"
+              parent="menu_wa_tracker_monitoring"
+              action="action_wa_voice_messages"
+              sequence="4"/>
+
+    <menuitem id="menu_wa_alerts"
+              name="Keyword Alerts"
+              parent="menu_wa_tracker_monitoring"
+              action="action_wa_keyword_alert_log"
+              sequence="5"/>
+
+    <menuitem id="menu_wa_tone_chart"
+              name="Tone Chart"
+              parent="menu_wa_tracker_monitoring"
+              action="action_wa_tone_chart"
+              sequence="6"/>
+
+    <menuitem id="menu_wa_tone_report"
+              name="Tone Report"
+              parent="menu_wa_tracker_monitoring"
+              action="action_wa_tone_report"
+              sequence="7"/>
+
+    <menuitem id="menu_wa_message_tone"
+              name="Tone Analysis"
+              parent="menu_wa_tracker_monitoring"
+              action="action_wa_message_tone_all"
+              sequence="8"/>
+
+    <menuitem id="menu_wa_message_tone_harsh"
+              name="Harsh Messages"
+              parent="menu_wa_tracker_monitoring"
+              action="action_wa_message_tone_harsh"
+              sequence="9"/>
+
+    <menuitem id="menu_wa_response_time_summary"
+              name="Response Time"
+              parent="menu_wa_tracker_monitoring"
+              action="action_wa_response_time_summary"
+              sequence="10"/>
+
+    <menuitem id="menu_wa_response_time_detail"
+              name="Response Time Detail"
+              parent="menu_wa_tracker_monitoring"
+              action="action_wa_response_time_detail"
+              sequence="11"/>
+
+    <!-- ─── Reporting ───────────────────────────────────────────────── -->
+    <menuitem id="menu_wa_tracker_reporting"
+              name="Reporting"
+              parent="menu_wa_tracker_root"
+              sequence="9"/>
+
+    <menuitem id="menu_wa_tone_report_wizard"
+              name="Tone Report"
+              parent="menu_wa_tracker_reporting"
+              action="action_wa_tone_report_wizard"
+              sequence="1"/>
+
+    <!-- ─── Configuration ──────────────────────────────────────────── -->
+    <menuitem id="menu_wa_tracker_config"
+              name="Configuration"
+              parent="menu_wa_tracker_root"
+              sequence="10"/>
+
+    <menuitem id="menu_wa_employee_sessions"
+              name="Employee Sessions"
+              parent="menu_wa_tracker_config"
+              action="action_wa_employee_session"
+              sequence="1"/>
+
+    <menuitem id="menu_wa_alert_rules"
+              name="Alert Rules"
+              parent="menu_wa_tracker_config"
+              action="action_wa_keyword_alert_rules"
+              sequence="2"/>
+
+    <menuitem id="menu_wa_quality_scores"
+              name="Quality Scores"
+              parent="menu_wa_tracker_config"
+              action="action_wa_quality_score"
+              sequence="3"/>
+
+    <menuitem id="menu_wa_dashboard_volume"
+              name="Message Volume"
+              parent="menu_wa_tracker_config"
+              action="action_wa_dashboard_volume"
+              sequence="4"/>
+
+    <menuitem id="menu_wa_dashboard_hours"
+              name="Activity Hours"
+              parent="menu_wa_tracker_config"
+              action="action_wa_dashboard_activity_hours"
+              sequence="5"/>
+
+    <menuitem id="menu_wa_dashboard_quality"
+              name="Quality Trends"
+              parent="menu_wa_tracker_config"
+              action="action_wa_dashboard_quality"
+              sequence="6"/>
+
+    <menuitem id="menu_wa_voice_test"
+              name="Voice Test"
+              parent="menu_wa_tracker_config"
+              sequence="98"
+              action="action_wa_voice_test_url"/>
+
+    <menuitem id="menu_wa_voice_config"
+              name="AI / Voice Settings"
+              parent="menu_wa_tracker_config"
+              sequence="99"
+              action="action_wa_voice_config"/>
+
+</odoo>

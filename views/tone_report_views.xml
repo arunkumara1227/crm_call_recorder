@@ -17,6 +17,7 @@
 
                     <group>
                         <group string="Filters">
+                            <field name="channel" widget="radio"/>
                             <field name="api_key_id" options="{'no_create': True}"/>
                             <field name="date_range"/>
                             <field name="date_from"
@@ -34,39 +35,96 @@
                     </group>
 
                     <separator string="Drill down"/>
-                    <div class="row mt-3">
-                        <div class="col-4 text-center">
-                            <button name="action_view_soft" type="object"
-                                    class="btn btn-success btn-block"
-                                    style="width:100%; padding:24px; font-size:1.1em;">
-                                <div style="font-size:2em;">😊</div>
-                                <div><strong>Soft / Polite</strong></div>
-                                <div style="font-size:1.5em;">
+                    <div class="row mt-3 g-3">
+
+                        <!-- ─── Soft tile ─── -->
+                        <div class="col-4">
+                            <div class="text-center p-4 h-100"
+                                 style="background:#e8f5e9; border:1px solid #c8e6c9; border-radius:12px;">
+                                <div style="font-size:2.5em; line-height:1;">😊</div>
+                                <div class="text-success mt-2"><strong>Soft / Polite</strong></div>
+                                <div style="font-size:3em; font-weight:700; color:#2e7d32; line-height:1.1;">
                                     <field name="count_soft" readonly="1" nolabel="1"/>
                                 </div>
-                            </button>
+                                <div class="d-flex flex-column gap-2 mt-3">
+                                    <button name="action_view_soft_calls" type="object"
+                                            class="btn btn-outline-success btn-sm"
+                                            invisible="channel == 'whatsapp'">
+                                        <i class="fa fa-microphone me-1"/>Calls
+                                        <span class="badge bg-success ms-1">
+                                            <field name="count_soft_calls" readonly="1" nolabel="1"/>
+                                        </span>
+                                    </button>
+                                    <button name="action_view_soft_wa" type="object"
+                                            class="btn btn-outline-success btn-sm"
+                                            invisible="channel == 'calls'">
+                                        <i class="fa fa-whatsapp me-1"/>WhatsApp
+                                        <span class="badge bg-success ms-1">
+                                            <field name="count_soft_wa" readonly="1" nolabel="1"/>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-4 text-center">
-                            <button name="action_view_neutral" type="object"
-                                    class="btn btn-warning btn-block"
-                                    style="width:100%; padding:24px; font-size:1.1em;">
-                                <div style="font-size:2em;">😐</div>
-                                <div><strong>Neutral</strong></div>
-                                <div style="font-size:1.5em;">
+
+                        <!-- ─── Neutral tile ─── -->
+                        <div class="col-4">
+                            <div class="text-center p-4 h-100"
+                                 style="background:#fff8e1; border:1px solid #ffe082; border-radius:12px;">
+                                <div style="font-size:2.5em; line-height:1;">😐</div>
+                                <div class="text-warning mt-2"><strong>Neutral</strong></div>
+                                <div style="font-size:3em; font-weight:700; color:#f57c00; line-height:1.1;">
                                     <field name="count_neutral" readonly="1" nolabel="1"/>
                                 </div>
-                            </button>
+                                <div class="d-flex flex-column gap-2 mt-3">
+                                    <button name="action_view_neutral_calls" type="object"
+                                            class="btn btn-outline-warning btn-sm"
+                                            invisible="channel == 'whatsapp'">
+                                        <i class="fa fa-microphone me-1"/>Calls
+                                        <span class="badge bg-warning text-dark ms-1">
+                                            <field name="count_neutral_calls" readonly="1" nolabel="1"/>
+                                        </span>
+                                    </button>
+                                    <button name="action_view_neutral_wa" type="object"
+                                            class="btn btn-outline-warning btn-sm"
+                                            invisible="channel == 'calls'">
+                                        <i class="fa fa-whatsapp me-1"/>WhatsApp
+                                        <span class="badge bg-warning text-dark ms-1">
+                                            <field name="count_neutral_wa" readonly="1" nolabel="1"/>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-4 text-center">
-                            <button name="action_view_hard" type="object"
-                                    class="btn btn-danger btn-block"
-                                    style="width:100%; padding:24px; font-size:1.1em;">
-                                <div style="font-size:2em;">😡</div>
-                                <div><strong>Hard / Critical</strong></div>
-                                <div style="font-size:1.5em;">
+
+                        <!-- ─── Hard tile ─── -->
+                        <div class="col-4">
+                            <div class="text-center p-4 h-100"
+                                 style="background:#fdecea; border:1px solid #f5c6cb; border-radius:12px;">
+                                <div style="font-size:2.5em; line-height:1;">😡</div>
+                                <div class="text-danger mt-2"><strong>Hard / Critical</strong></div>
+                                <div style="font-size:3em; font-weight:700; color:#c62828; line-height:1.1;">
                                     <field name="count_hard" readonly="1" nolabel="1"/>
                                 </div>
-                            </button>
+                                <div class="d-flex flex-column gap-2 mt-3">
+                                    <button name="action_view_hard_calls" type="object"
+                                            class="btn btn-outline-danger btn-sm"
+                                            invisible="channel == 'whatsapp'">
+                                        <i class="fa fa-microphone me-1"/>Calls
+                                        <span class="badge bg-danger ms-1">
+                                            <field name="count_hard_calls" readonly="1" nolabel="1"/>
+                                        </span>
+                                    </button>
+                                    <button name="action_view_hard_wa" type="object"
+                                            class="btn btn-outline-danger btn-sm"
+                                            invisible="channel == 'calls'">
+                                        <i class="fa fa-whatsapp me-1"/>WhatsApp
+                                        <span class="badge bg-danger ms-1">
+                                            <field name="count_hard_wa" readonly="1" nolabel="1"/>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </sheet>

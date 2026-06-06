@@ -6,6 +6,7 @@ Parameter `crm_call_recorder.api_key` — change it on every install.
 """
 
 import base64
+import hmac
 import json
 import logging
 
@@ -72,7 +73,7 @@ def _check_api_key():
     expected = (
         request.env['ir.config_parameter'].sudo().get_param(API_KEY_PARAM) or ''
     ).strip()
-    if expected and presented == expected:
+    if expected and hmac.compare_digest(presented, expected):
         _logger.info(
             'CRM Call Recorder: auth via legacy sysparam '
             '(consider migrating to crm.call.api.key per-device keys)'

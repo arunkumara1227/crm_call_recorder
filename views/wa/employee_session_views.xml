@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- Employee Session: Kanban View -->
+    <!-- ============================================================ -->
+    <record id="view_wa_employee_session_kanban_config" model="ir.ui.view">
+        <field name="name">wa.employee.session.kanban.config</field>
+        <field name="model">wa.employee.session</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="phone_number"/>
+                <field name="session_id"/>
+                <field name="session_status"/>
+                <field name="monitoring_enabled"/>
+                <field name="total_messages"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex align-items-center p-2">
+                            <i class="fa fa-user-circle fa-2x text-primary me-3"/>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <strong><field name="employee_id"/></strong>
+                                    <span t-if="record.session_status.raw_value == 'connected'" class="badge bg-success">Connected</span>
+                                    <span t-elif="record.session_status.raw_value == 'disconnected'" class="badge bg-danger">Disconnected</span>
+                                    <span t-else="" class="badge bg-warning">Waiting QR</span>
+                                </div>
+                                <div class="text-muted small"><field name="department_id"/></div>
+                                <div class="small mt-1">
+                                    <i class="fa fa-whatsapp text-success me-1"/><field name="phone_number"/>
+                                    <span class="ms-2"><i class="fa fa-comments text-primary me-1"/><field name="total_messages"/> msgs</span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Employee Session: List View -->
+    <!-- ============================================================ -->
+    <record id="view_wa_employee_session_list" model="ir.ui.view">
+        <field name="name">wa.employee.session.list</field>
+        <field name="model">wa.employee.session</field>
+        <field name="arch" type="xml">
+            <list string="Employee WhatsApp Sessions">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="job_title"/>
+                <field name="phone_number"/>
+                <field name="session_id"/>
+                <field name="session_status"/>
+                <field name="today_sent" string="Sent Today"/>
+                <field name="today_received" string="Recv Today"/>
+                <field name="total_messages"/>
+                <field name="unique_contacts"/>
+                <field name="alert_count"/>
+                <field name="quality_score"/>
+                <field name="last_activity"/>
+                <field name="monitoring_enabled"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Employee Session: Form View -->
+    <!-- ============================================================ -->
+    <record id="view_wa_employee_session_form" model="ir.ui.view">
+        <field name="name">wa.employee.session.form</field>
+        <field name="model">wa.employee.session</field>
+        <field name="arch" type="xml">
+            <form string="Employee WhatsApp Session">
+                <header>
+                    <button name="action_refresh_stats"
+                            string="Refresh Stats"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-refresh"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_messages"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-comments">
+                            <field name="total_messages" widget="statinfo" string="Messages"/>
+                        </button>
+                        <button name="action_view_conversations"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-users">
+                            <field name="unique_contacts" widget="statinfo" string="Contacts"/>
+                        </button>
+                        <button name="action_view_alerts"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-exclamation-triangle">
+                            <field name="alert_count" widget="statinfo" string="Alerts"/>
+                        </button>
+                        <button name="action_view_quality_scores"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-star">
+                            <field name="quality_score" widget="statinfo" string="Quality"/>
+                        </button>
+                    </div>
+
+                    <group>
+                        <group string="Employee Details">
+                            <field name="employee_id"/>
+                            <field name="department_id"/>
+                            <field name="manager_id"/>
+                            <field name="job_title"/>
+                        </group>
+                        <group string="WhatsApp Assignment">
+                            <field name="session_id"/>
+                            <field name="phone_number" widget="phone"/>
+                            <field name="session_status"/>
+                            <field name="monitoring_enabled"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Today" name="today">
+                            <group>
+                                <group string="Today">
+                                    <field name="today_sent"/>
+                                    <field name="today_received"/>
+                                </group>
+                                <group string="Overall">
+                                    <field name="total_sent"/>
+                                    <field name="total_received"/>
+                                    <field name="avg_response_minutes"/>
+                                    <field name="last_activity"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Conversations" name="conversations">
+                            <button name="action_view_conversations"
+                                    string="Open All Conversations"
+                                    type="object"
+                                    class="btn-primary mb-3"
+                                    icon="fa-comments"/>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Internal notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Action -->
+    <!-- ============================================================ -->
+    <record id="action_wa_employee_session" model="ir.actions.act_window">
+        <field name="name">Employee Sessions</field>
+        <field name="res_model">wa.employee.session</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Assign WhatsApp sessions to employees
+            </p>
+        </field>
+    </record>
+
+</odoo>

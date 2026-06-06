@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ─── Kanban view ────────────────────────────────────────────── -->
+    <record id="view_crm_call_device_summary_kanban" model="ir.ui.view">
+        <field name="name">crm.call.device.summary.kanban</field>
+        <field name="model">crm.call.device.summary</field>
+        <field name="arch" type="xml">
+            <kanban default_order="last_call_at desc" class="o_kanban_mobile">
+                <field name="api_key_id"/>
+                <field name="device_name"/>
+                <field name="employee_id"/>
+                <field name="total_calls"/>
+                <field name="incoming_count"/>
+                <field name="outgoing_count"/>
+                <field name="avg_tone_score"/>
+                <field name="harsh_calls_count"/>
+                <field name="done_transcripts_count"/>
+                <field name="unique_contacts_count"/>
+                <field name="last_call_at"/>
+                <field name="last_contact_phone"/>
+                <field name="last_sim_label"/>
+
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="oe_kanban_card p-3"
+                             style="border-radius: 12px; cursor: pointer;">
+                            <a type="object" name="action_open_device_recordings"
+                               style="color: inherit; text-decoration: none; display: block;">
+
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <i class="fa fa-mobile fa-lg text-primary me-2"/>
+                                        <strong class="fs-5"><field name="device_name"/></strong>
+                                    </div>
+                                    <span t-if="record.employee_id.raw_value"
+                                          class="badge bg-success">
+                                        <field name="employee_id"/>
+                                    </span>
+                                    <span t-if="!record.employee_id.raw_value"
+                                          class="badge bg-secondary">No Employee</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-1 px-1">
+                                    <div class="text-center">
+                                        <div class="fw-bold text-primary fs-5">
+                                            <field name="total_calls"/>
+                                        </div>
+                                        <div class="text-muted small">Total</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="fw-bold text-info fs-5">
+                                            <field name="outgoing_count"/>
+                                        </div>
+                                        <div class="text-muted small">Out</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="fw-bold text-success fs-5">
+                                            <field name="incoming_count"/>
+                                        </div>
+                                        <div class="text-muted small">In</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="fw-bold text-danger fs-5">
+                                            <field name="harsh_calls_count"/>
+                                        </div>
+                                        <div class="text-muted small">Harsh</div>
+                                    </div>
+                                </div>
+
+                                <hr class="my-1"/>
+
+                                <div class="d-flex justify-content-between px-1 mt-1">
+                                    <div class="small">
+                                        <i class="fa fa-star text-warning me-1"/>
+                                        <span class="fw-bold">
+                                            <field name="avg_tone_score" widget="float" digits="[5,1]"/>
+                                        </span>/100 tone
+                                    </div>
+                                    <div class="small">
+                                        <i class="fa fa-users text-muted me-1"/>
+                                        <span class="fw-bold">
+                                            <field name="unique_contacts_count"/>
+                                        </span> contacts
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between px-1 mt-1">
+                                    <div class="small">
+                                        <i class="fa fa-microphone text-primary me-1"/>
+                                        <span class="fw-bold">
+                                            <field name="done_transcripts_count"/>
+                                        </span>/<field name="total_calls"/> transcribed
+                                    </div>
+                                </div>
+
+                                <div class="text-muted small mt-2 text-end">
+                                    <i class="fa fa-clock-o me-1"/>
+                                    Last: <field name="last_call_at" widget="relative"/>
+                                    <t t-if="record.last_sim_label.raw_value">
+                                        · <field name="last_sim_label"/>
+                                    </t>
+                                </div>
+                            </a>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ─── Form view (device detail with tabs) ────────────────────── -->
+    <record id="view_crm_call_device_summary_form" model="ir.ui.view">
+        <field name="name">crm.call.device.summary.form</field>
+        <field name="model">crm.call.device.summary</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" delete="false">
+                <sheet>
+                    <!-- Stat buttons — WA tracker features for this device's employee -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_device_recordings" type="object"
+                                class="oe_stat_button" icon="fa-microphone">
+                            <field name="total_calls" widget="statinfo" string="Call Recordings"/>
+                        </button>
+                        <button name="action_open_wa_chat_view" type="object"
+                                class="oe_stat_button" icon="fa-whatsapp"
+                                invisible="not wa_employee_session_id">
+                            <field name="wa_message_count" widget="statinfo" string="WhatsApp Chats"/>
+                        </button>
+                        <button name="action_open_wa_tones" type="object"
+                                class="oe_stat_button" icon="fa-star"
+                                invisible="not wa_employee_session_id">
+                            <field name="wa_tone_count" widget="statinfo" string="WA Tones"/>
+                        </button>
+                        <button name="action_open_wa_logs" type="object"
+                                class="oe_stat_button" icon="fa-book"
+                                invisible="not wa_employee_session_id">
+                            <field name="wa_log_count" widget="statinfo" string="Comm Logs"/>
+                        </button>
+                        <button name="action_open_wa_session" type="object"
+                                class="oe_stat_button" icon="fa-cog"
+                                invisible="not wa_employee_session_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Session</span>
+                                <span class="o_stat_text">Settings</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <field name="wa_employee_session_id" invisible="1"/>
+
+                    <div class="oe_title">
+                        <label for="device_name" class="oe_edit_only"/>
+                        <h1>
+                            <i class="fa fa-mobile fa-lg text-primary me-2"/>
+                            <field name="device_name" readonly="1"/>
+                        </h1>
+                        <div>
+                            <span class="badge bg-success" invisible="not employee_id">
+                                <field name="employee_id" readonly="1"/>
+                            </span>
+                        </div>
+                    </div>
+
+                    <group>
+                        <group string="Call Activity">
+                            <field name="total_calls"/>
+                            <field name="incoming_count"/>
+                            <field name="outgoing_count"/>
+                            <field name="unique_contacts_count"/>
+                            <field name="last_call_at"/>
+                            <field name="last_sim_label"/>
+                        </group>
+                        <group string="Call Quality">
+                            <field name="avg_tone_score" widget="float" digits="[5,1]"/>
+                            <field name="harsh_calls_count"/>
+                            <field name="done_transcripts_count"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Call Recordings" name="recordings">
+                            <field name="recording_ids" readonly="1" nolabel="1">
+                                <list default_order="call_date desc"
+                                      decoration-success="state == 'matched'"
+                                      decoration-warning="state == 'unmatched'"
+                                      decoration-danger="state == 'failed'">
+                                    <field name="call_date"/>
+                                    <field name="phone"/>
+                                    <field name="matched_partner_id"/>
+                                    <field name="direction" widget="badge"/>
+                                    <field name="duration_display" string="Duration"/>
+                                    <field name="sim_label"/>
+                                    <field name="transcription_status" widget="badge"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ─── List view (fallback for view switcher) ─────────────────── -->
+    <record id="view_crm_call_device_summary_list" model="ir.ui.view">
+        <field name="name">crm.call.device.summary.list</field>
+        <field name="model">crm.call.device.summary</field>
+        <field name="arch" type="xml">
+            <list default_order="last_call_at desc"
+                  decoration-danger="harsh_calls_count > 0">
+                <field name="device_name"/>
+                <field name="employee_id"/>
+                <field name="total_calls"/>
+                <field name="incoming_count"/>
+                <field name="outgoing_count"/>
+                <field name="unique_contacts_count" optional="show"/>
+                <field name="avg_tone_score" widget="float" digits="[5,1]" optional="show"/>
+                <field name="harsh_calls_count" optional="show"/>
+                <field name="done_transcripts_count" optional="hide"/>
+                <field name="last_call_at"/>
+                <field name="last_contact_phone" optional="hide"/>
+                <field name="last_sim_label" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ─── Search view ─────────────────────────────────────────────── -->
+    <record id="view_crm_call_device_summary_search" model="ir.ui.view">
+        <field name="name">crm.call.device.summary.search</field>
+        <field name="model">crm.call.device.summary</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="device_name"/>
+                <field name="employee_id"/>
+                <field name="last_contact_phone"/>
+                <separator/>
+                <filter name="has_harsh" string="Has Harsh Calls"
+                        domain="[('harsh_calls_count', '>', 0)]"/>
+                <separator/>
+                <filter name="group_employee" string="Employee"
+                        context="{'group_by': 'employee_id'}"/>
+                <filter name="group_sim" string="Last SIM"
+                        context="{'group_by': 'last_sim_label'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ─── Window action ──────────────────────────────────────────── -->
+    <record id="action_crm_call_device_summary" model="ir.actions.act_window">
+        <field name="name">Recordings by Device</field>
+        <field name="res_model">crm.call.device.summary</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_crm_call_device_summary_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No call recordings yet from any device.
+            </p>
+            <p>
+                One card per connected device (per-device API key). Click a card
+                to see every recording uploaded from that phone.
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -34,6 +34,12 @@ class CrmCallApiKey(models.Model):
         default=lambda self: self.env.uid,
         help='Odoo user this device acts as for audit / future per-user rules.',
     )
+    employee_id = fields.Many2one(
+        'hr.employee', string='Employee',
+        help='HR employee record this device belongs to. Bridges to '
+             'whatsapp_employee_tracker so the employee form can show '
+             'unified call + WhatsApp activity.',
+    )
     active = fields.Boolean(default=True)
     company_id = fields.Many2one(
         'res.company', string='Company',
@@ -56,6 +62,67 @@ class CrmCallApiKey(models.Model):
             rec.recording_count = Recording.search_count(
                 [('created_by_api_key_id', '=', rec.id)]
             ) if rec.id else 0
+
+    # ─── Auto-bridge to wa.employee.session ────────────────────────────
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec in records:
+            rec._ensure_wa_employee_session()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'employee_id' in vals:
+            for rec in self:
+                rec._ensure_wa_employee_session()
+        return res
+
+    def _ensure_wa_employee_session(self):
+        """If employee_id is set and no wa.employee.session exists for that
+        employee, auto-create a placeholder whatsapp.session + wa.employee.session
+        so the employee appears on the unified Communications Dashboard.
+
+        Idempotent. Skips silently if the WhatsApp models aren't available
+        (e.g. whatsapp_employee_tracker temporarily uninstalled) — checked via
+        registry presence, not try/except.
+        """
+        self.ensure_one()
+        if not self.employee_id:
+            return
+        if 'wa.employee.session' not in self.env or 'whatsapp.session' not in self.env:
+            return
+        WaSession = self.env['wa.employee.session'].sudo()
+        try:
+            with self.env.cr.savepoint():
+                # Row-lock the employee so concurrent api_key writes serialise here.
+                self.env.cr.execute(
+                    'SELECT id FROM hr_employee WHERE id = %s FOR UPDATE',
+                    (self.employee_id.id,),
+                )
+                existing = WaSession.search(
+                    [('employee_id', '=', self.employee_id.id)], limit=1,
+                )
+                if existing:
+                    return
+                WhatsApp = self.env['whatsapp.session'].sudo()
+                placeholder = WhatsApp.create({
+                    'name': f'Call-only: {self.employee_id.name}',
+                    'status': 'disconnected',
+                    'company_id': self.company_id.id,
+                })
+                digits = (self.employee_id.work_phone or '').replace(' ', '').replace('+', '').replace('-', '')
+                WaSession.create({
+                    'employee_id': self.employee_id.id,
+                    'session_id': placeholder.id,
+                    'phone_number': digits or '0',
+                    'monitoring_enabled': False,
+                })
+        except Exception:
+            _logger.exception(
+                'Failed to bridge api_key %s -> wa.employee.session; '
+                'continuing without auto-session.', self.id,
+            )
 
     def action_generate_key(self):
         """Generate a new API key. Plaintext shown ONCE via the wizard."""

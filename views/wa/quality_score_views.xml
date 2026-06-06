@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- Quality Scores: List View -->
+    <!-- ============================================================ -->
+    <record id="view_wa_quality_score_list" model="ir.ui.view">
+        <field name="name">wa.quality.score.list</field>
+        <field name="model">wa.quality.score</field>
+        <field name="arch" type="xml">
+            <list string="Quality Scores"
+                   decoration-success="score >= 75"
+                   decoration-warning="score &gt;= 40 and score &lt; 75"
+                   decoration-danger="score &lt; 40">
+                <field name="score_date"/>
+                <field name="employee_id" widget="many2one_avatar_employee"/>
+                <field name="department_id" optional="hide"/>
+                <field name="score"/>
+                <field name="response_time_score" string="Response (25)"/>
+                <field name="volume_score" string="Volume (25)"/>
+                <field name="consistency_score" string="Consistency (25)"/>
+                <field name="compliance_score" string="Compliance (25)"/>
+                <field name="period_messages" string="Messages"/>
+                <field name="period_conversations" string="Conversations"/>
+                <field name="period_alerts" string="Alerts"
+                       decoration-danger="period_alerts > 0"/>
+                <field name="avg_response_minutes" widget="float_time"/>
+                <field name="peak_hour" string="Peak Hour"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Quality Scores: Form View -->
+    <record id="view_wa_quality_score_form" model="ir.ui.view">
+        <field name="name">wa.quality.score.form</field>
+        <field name="model">wa.quality.score</field>
+        <field name="arch" type="xml">
+            <form string="Quality Score" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group string="Score Overview">
+                            <field name="employee_id"/>
+                            <field name="department_id"/>
+                            <field name="score_date"/>
+                            <field name="score"/>
+                        </group>
+                        <group string="Score Breakdown (each out of 25)">
+                            <field name="response_time_score"/>
+                            <field name="volume_score"/>
+                            <field name="consistency_score"/>
+                            <field name="compliance_score"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Period Statistics">
+                            <field name="period_messages"/>
+                            <field name="period_sent"/>
+                            <field name="period_received"/>
+                            <field name="period_conversations"/>
+                        </group>
+                        <group string="Activity Details">
+                            <field name="period_alerts"/>
+                            <field name="avg_response_minutes" widget="float_time"/>
+                            <field name="avg_word_count"/>
+                            <field name="peak_hour"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Quality Scores: Search -->
+    
+
+    <!-- Quality Scores: Graph -->
+    <record id="view_wa_quality_score_graph" model="ir.ui.view">
+        <field name="name">wa.quality.score.graph</field>
+        <field name="model">wa.quality.score</field>
+        <field name="arch" type="xml">
+            <graph string="Quality Score Trends" type="line">
+                <field name="score_date" interval="day"/>
+                <field name="score" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Quality Scores: Pivot -->
+    <record id="view_wa_quality_score_pivot" model="ir.ui.view">
+        <field name="name">wa.quality.score.pivot</field>
+        <field name="model">wa.quality.score</field>
+        <field name="arch" type="xml">
+            <pivot string="Quality Score Analysis">
+                <field name="employee_id" type="row"/>
+                <field name="score_date" interval="week" type="col"/>
+                <field name="score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_wa_quality_score" model="ir.actions.act_window">
+        <field name="name">Quality Scores</field>
+        <field name="res_model">wa.quality.score</field>
+        <field name="view_mode">list,graph,pivot,form</field>
+    </record>
+
+</odoo>

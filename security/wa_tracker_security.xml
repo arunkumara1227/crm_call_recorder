@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="group_wa_tracker_manager" model="res.groups">
+        <field name="name">WA Tracker Manager</field>
+        <field name="comment">Full access to monitor all employees WhatsApp communications.</field>
+    </record>
+
+    <record id="group_wa_tracker_dept_head" model="res.groups">
+        <field name="name">WA Tracker Department Head</field>
+        <field name="comment">View WhatsApp tracking data for employees in their department only.</field>
+    </record>
+
+</odoo>

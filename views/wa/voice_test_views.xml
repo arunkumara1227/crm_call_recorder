@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_wa_voice_test_url" model="ir.actions.act_url">
+        <field name="name">Voice Transcription Tester</field>
+        <field name="url">/wa_tracker/voice_test</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

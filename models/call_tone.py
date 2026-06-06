@@ -1,6 +1,6 @@
 """Tone analysis for transcribed call recordings.
 
-Ported from `whatsapp_employee_tracker.wa.message.tone`. Same VADER + keyword
+Ported from `crm_call_recorder.wa.message.tone`. Same VADER + keyword
 formula (keywords 70%, VADER 30%); same 5-tier category + 3-tier label.
 
 Adapted to operate on `crm.call.recording.transcription_text` instead of
@@ -247,6 +247,25 @@ class CrmCallTone(models.Model):
             tone.write(values)
         else:
             tone = self.create(values)
+
+        # Push a bus notification on Hard tone so the /calls bell can react in
+        # real time. Wrapped in try/except — failure must not block the tone.
+        try:
+            if tone.tone_label == 'Hard':
+                Bus = self.env['bus.bus']
+                Bus._sendone(
+                    'crm_call_recorder.alert', 'harsh_tone',
+                    {
+                        'recording_id': rec.id,
+                        'phone': rec.phone or '',
+                        'tone_score': float(tone.tone_score or 0),
+                        'call_date': fields.Datetime.to_string(rec.call_date) if rec.call_date else '',
+                        'device_name': rec.created_by_api_key_id.name or '' if rec.created_by_api_key_id else '',
+                    },
+                )
+        except Exception as e:
+            _logger.warning("Bus push for harsh tone failed: %s", e)
+
         return tone.id
 
 

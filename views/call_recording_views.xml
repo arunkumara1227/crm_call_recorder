@@ -72,6 +72,9 @@
                                        invisible="not has_recording"/>
                                 <field name="recording_size_kb" string="Size (KB)"
                                        invisible="not has_recording"/>
+                                <field name="audio_player_html" widget="html"
+                                       nolabel="1" readonly="1" colspan="2"
+                                       invisible="not has_recording"/>
                                 <field name="recording_url" widget="url"
                                        string="Open / Download"
                                        readonly="1" invisible="not has_recording"/>

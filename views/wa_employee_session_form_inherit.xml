@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Add a "Call Recorder" notebook tab + stat button to the
+         existing Employee Sessions form. -->
+    <record id="view_wa_employee_session_form_calls_inherit" model="ir.ui.view">
+        <field name="name">wa.employee.session.form.crm_call_recorder.inherit</field>
+        <field name="model">wa.employee.session</field>
+        <field name="inherit_id" ref="crm_call_recorder.view_wa_employee_session_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Stat button: Call Recordings count -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_call_recordings_from_session"
+                        type="object" class="oe_stat_button"
+                        icon="fa-microphone">
+                    <field name="total_call_recordings"
+                           widget="statinfo"
+                           string="Call Recordings"/>
+                </button>
+            </xpath>
+
+            <!-- New notebook tab: Call Recorder -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Call Recorder" name="call_recorder">
+                    <group>
+                        <group string="Today">
+                            <field name="calls_today_out"/>
+                            <field name="calls_today_in"/>
+                        </group>
+                        <group string="Overall">
+                            <field name="total_call_recordings"/>
+                            <field name="last_call_at"/>
+                            <field name="avg_call_duration_sec"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Tone Analysis">
+                            <field name="call_avg_tone_score"/>
+                            <field name="harsh_calls_count"/>
+                        </group>
+                    </group>
+                    <separator string="Linked Devices"/>
+                    <field name="call_api_key_ids" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="key_prefix"/>
+                            <field name="recording_count"/>
+                            <field name="last_used"/>
+                            <field name="active"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

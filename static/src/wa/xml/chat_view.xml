@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="crm_call_recorder.ChatView">
+        <div class="wa-chat-container d-flex" style="height: calc(100vh - 52px); overflow:hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+
+            <!-- ===== LEFT PANEL: Contact List ===== -->
+            <div class="d-flex flex-column" style="width:360px; min-width:360px; border-right:1px solid #d1d7db; background:#fff;">
+
+                <!-- Header -->
+                <div class="px-3 py-2" style="background:#008069; color:white;">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="fw-bold" style="font-size:18px;">
+                            <i class="fa fa-whatsapp me-2"/>WA Tracker
+                        </span>
+                        <button class="btn btn-sm text-white" t-on-click="loadConversations" title="Refresh">
+                            <i class="fa fa-refresh"/>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Employee Filter -->
+                <div class="px-2 py-1" style="background:#008069;">
+                    <select class="form-select form-select-sm"
+                            t-on-change="onEmployeeChange"
+                            style="border-radius:8px; border:none; font-size:13px; background:#f0f2f5;">
+                        <option value="">All Employees</option>
+                        <t t-foreach="state.employeeSessions" t-as="emp" t-key="emp.id">
+                            <option t-att-value="emp.id"
+                                    t-att-selected="state.employeeSessionId === emp.id">
+                                <t t-esc="emp.name"/>
+                            </option>
+                        </t>
+                    </select>
+                </div>
+
+                <!-- Search -->
+                <div class="p-2" style="background:#f0f2f5;">
+                    <div class="position-relative">
+                        <i class="fa fa-search position-absolute" style="left:12px; top:9px; color:#54656f;"/>
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               placeholder="Search or start new chat"
+                               t-on-input="onSearchInput"
+                               style="padding-left:35px; border-radius:8px; border:none; background:#fff; font-size:13px;"/>
+                    </div>
+                </div>
+
+                <!-- Contact List -->
+                <div class="flex-grow-1" style="overflow-y:auto;">
+                    <t t-foreach="filteredConversations" t-as="conv" t-key="conv.id">
+                        <div t-on-click="() => this.selectConversation(conv.id)"
+                             class="d-flex align-items-center px-3 py-2"
+                             t-att-style="'cursor:pointer; border-bottom:1px solid #f0f2f5;' + (state.selectedConvId === conv.id ? ' background-color:#f0f2f5;' : '')"
+                             t-attf-class="wa-contact-row">
+
+                            <!-- Avatar -->
+                            <div class="flex-shrink-0 me-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:49px; height:49px; background-color:#dfe5e7;">
+                                    <i class="fa fa-user" style="font-size:24px; color:#fff;"/>
+                                </div>
+                            </div>
+
+                            <!-- Info -->
+                            <div class="flex-grow-1 min-w-0 py-1">
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <span class="text-truncate fw-semibold" style="font-size:16px; color:#111b21;">
+                                        <t t-esc="conv.contact_name"/>
+                                    </span>
+                                    <small class="flex-shrink-0 ms-2" style="font-size:12px; color:#667781;">
+                                        <t t-esc="formatTime(conv.last_message_date)"/>
+                                    </small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <span class="text-truncate" style="font-size:13px; color:#667781;">
+                                        <t t-esc="conv.last_message_preview or conv.phone"/>
+                                    </span>
+                                    <t t-if="conv.total_messages > 0">
+                                        <span class="badge rounded-pill flex-shrink-0 ms-2"
+                                              style="background-color:#25d366; color:white; font-size:11px; min-width:20px;">
+                                            <t t-esc="conv.total_messages"/>
+                                        </span>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                    <t t-if="filteredConversations.length === 0">
+                        <div class="text-center p-4" style="color:#667781;">
+                            <i class="fa fa-inbox fa-2x d-block mb-2"/>
+                            No conversations found
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- ===== RIGHT PANEL: Messages ===== -->
+            <div class="flex-grow-1 d-flex flex-column" style="background:#efeae2; background-image: url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23d4cfc6%22%20fill-opacity%3D%220.2%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E');">
+
+                <t t-if="state.selectedConvId">
+                    <!-- Chat Header -->
+                    <div class="d-flex align-items-center px-4 py-2" style="background:#f0f2f5; border-bottom:1px solid #d1d7db; min-height:60px;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                             style="width:40px; height:40px; background-color:#dfe5e7;">
+                            <i class="fa fa-user" style="font-size:20px; color:#fff;"/>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold" style="font-size:16px; color:#111b21;">
+                                <t t-esc="selectedConvName"/>
+                            </div>
+                            <small style="font-size:13px; color:#667781;">
+                                <t t-esc="selectedConvPhone"/>
+                                <t t-if="selectedConvEmployee">
+                                    <span class="ms-2">· Employee: <t t-esc="selectedConvEmployee"/></span>
+                                </t>
+                            </small>
+                        </div>
+                        <button class="btn btn-sm" t-on-click="refreshMessages" title="Refresh"
+                                style="color:#54656f;">
+                            <i class="fa fa-refresh"/>
+                        </button>
+                    </div>
+
+                    <!-- Messages Area -->
+                    <div class="flex-grow-1 px-4 py-3" style="overflow-y:auto;" t-ref="messagesContainer">
+                        <t t-foreach="state.messages" t-as="msg" t-key="msg.id">
+                            <div class="d-flex mb-1"
+                                 t-att-class="msg.direction === 'outgoing' ? 'justify-content-end' : 'justify-content-start'">
+                                <div class="px-2 py-1 position-relative"
+                                     style="max-width:65%; border-radius:7.5px; word-wrap:break-word; box-shadow:0 1px 0.5px rgba(0,0,0,0.13);"
+                                     t-att-style="'max-width:65%; border-radius:7.5px; word-wrap:break-word; box-shadow:0 1px 0.5px rgba(0,0,0,0.13);' + (msg.direction === 'outgoing' ? ' background-color:#d9fdd3;' : ' background-color:#ffffff;')">
+
+                                    <span style="font-size:14.2px; color:#111b21; white-space:pre-wrap;">
+                                        <t t-esc="msg.message_text"/>
+                                    </span>
+                                    <span class="d-inline-flex align-items-center float-end ms-2 mt-1" style="font-size:11px; color:#667781;">
+                                        <t t-esc="formatTime(msg.message_date)"/>
+                                        <t t-if="msg.direction === 'outgoing'">
+                                            <i class="fa fa-check ms-1" style="color:#53bdeb; font-size:10px;"/>
+                                        </t>
+                                    </span>
+                                </div>
+                            </div>
+                        </t>
+
+                        <t t-if="state.messages.length === 0">
+                            <div class="text-center py-5">
+                                <div class="d-inline-block px-3 py-2 rounded" style="background:rgba(255,255,255,0.9); color:#667781; font-size:13px;">
+                                    <i class="fa fa-lock me-1"/> Messages are loaded from the tracker database
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- Empty State (no conversation selected) -->
+                <t t-if="!state.selectedConvId">
+                    <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1"
+                         style="background:#f0f2f5;">
+                        <div style="text-align:center; max-width:500px;">
+                            <i class="fa fa-whatsapp" style="font-size:80px; color:#41c352; display:block; margin-bottom:20px;"/>
+                            <h3 style="color:#41525d; font-weight:300;">WA Employee Tracker</h3>
+                            <p style="color:#667781; font-size:14px;">
+                                Select a conversation from the left panel to view messages.
+                                <br/>Monitor employee WhatsApp communications in real-time.
+                            </p>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Add stat buttons to hr.employee form: Call Recordings + WhatsApp Sessions. -->
+    <record id="view_hr_employee_form_inherit_call_recorder" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.crm_call_recorder</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Stat buttons in the existing button box -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_call_recordings" type="object"
+                        class="oe_stat_button" icon="fa-microphone">
+                    <field name="call_recording_count"
+                           widget="statinfo"
+                           string="Call Recordings"/>
+                </button>
+                <button name="action_view_wa_tracker" type="object"
+                        class="oe_stat_button" icon="fa-whatsapp"
+                        invisible="not wa_session_id">
+                    <field name="wa_total_messages"
+                           widget="statinfo"
+                           string="WhatsApp Messages"/>
+                </button>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

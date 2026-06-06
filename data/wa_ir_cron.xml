@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Sync messages to communication log every 1 minute -->
+        <record id="cron_sync_communication_log" model="ir.cron">
+            <field name="name">WA Tracker: Sync Messages to Communication Log</field>
+            <field name="model_id" ref="model_wa_communication_log"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_sync_messages()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+            <field name="priority">15</field>
+        </record>
+
+        <!-- Compute quality scores daily at midnight -->
+        <record id="cron_compute_quality_scores" model="ir.cron">
+            <field name="name">WA Tracker: Compute Daily Quality Scores</field>
+            <field name="model_id" ref="model_wa_quality_score"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_compute_scores()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active">True</field>
+            <field name="priority">20</field>
+        </record>
+
+        <!-- Fix ghost partner links every hour -->
+        <record id="cron_fix_ghost_partner_links" model="ir.cron">
+            <field name="name">WA Tracker: Fix Ghost Partner Links</field>
+            <field name="model_id" ref="model_wa_conversation"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_fix_ghost_partner_links()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="active">True</field>
+            <field name="priority">20</field>
+        </record>
+
+    </data>
+</odoo>

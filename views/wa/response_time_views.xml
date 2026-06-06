@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- Summary view: one row per employee session -->
+    <!-- ============================================================ -->
+    <record id="view_wa_response_time_summary_tree" model="ir.ui.view">
+        <field name="name">wa.response.time.summary.tree</field>
+        <field name="model">wa.response.time.summary</field>
+        <field name="arch" type="xml">
+            <list string="Response Time Summary" create="false" edit="false" delete="false"
+                  decoration-success="avg_response_minutes &lt; 5"
+                  decoration-warning="avg_response_minutes &gt;= 5 and avg_response_minutes &lt; 15"
+                  decoration-danger="avg_response_minutes &gt;= 15">
+                <field name="employee_id" string="Employee"/>
+                <field name="department_id" string="Department"/>
+                <field name="total_manual_replies" string="Manual Replies"/>
+                <field name="avg_response_minutes" string="Avg Response" widget="float" optional="show"/>
+                <field name="min_response_minutes" string="Fastest (min)" widget="float" optional="show"/>
+                <field name="max_response_minutes" string="Slowest (min)" widget="float" optional="show"/>
+                <field name="last_reply_date" string="Last Reply"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_wa_response_time_summary" model="ir.actions.act_window">
+        <field name="name">Response Time Summary</field>
+        <field name="res_model">wa.response.time.summary</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No manual reply data yet.
+            </p>
+            <p>
+                This report shows average response time per employee for
+                <strong>manual replies only</strong> (auto-reply messages are excluded).
+                Green = under 5 min, Yellow = 5-15 min, Red = over 15 min.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Detail view: one row per manual reply -->
+    <!-- ============================================================ -->
+    <record id="view_wa_response_time_stat_tree" model="ir.ui.view">
+        <field name="name">wa.response.time.stat.tree</field>
+        <field name="model">wa.response.time.stat</field>
+        <field name="arch" type="xml">
+            <list string="Manual Reply Details" create="false" edit="false" delete="false"
+                  decoration-success="response_minutes &lt; 5"
+                  decoration-warning="response_minutes &gt;= 5 and response_minutes &lt; 15"
+                  decoration-danger="response_minutes &gt;= 15">
+                <field name="reply_date" string="Reply Time"/>
+                <field name="employee_id" string="Employee"/>
+                <field name="department_id" string="Department" optional="hide"/>
+                <field name="phone" string="Customer"/>
+                <field name="customer_msg_date" string="Customer Sent At"/>
+                <field name="response_minutes" string="Response (min)" widget="float"/>
+                <field name="reply_text" string="Reply Preview"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_wa_response_time_detail" model="ir.actions.act_window">
+        <field name="name">Response Time Detail</field>
+        <field name="res_model">wa.response.time.stat</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No manual reply data yet.</p>
+        </field>
+    </record>
+
+</odoo>
