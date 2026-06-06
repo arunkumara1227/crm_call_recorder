@@ -1,6 +1,6 @@
 {
     'name': 'CRM Call Recorder',
-    'version': '19.0.9.2.0',
+    'version': '19.0.10.0.1',
     'category': 'Sales/CRM',
     'summary': 'Phone call recording capture + WhatsApp employee tracking',
     'description': """

@@ -244,8 +244,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
 
 /* ─── WhatsApp chat tab ─────────────────────────────────────────── */
 
-/* When on the WhatsApp tab, break out of the centered max-width container
-   and use the full viewport width / height. */
+/* When on a full-bleed tab (WhatsApp / Pipeline), break out of the centered
+   max-width container, use the full viewport width / height, AND lock body
+   scrolling so the inner pane heads stay visible. Internal scroll containers
+   (conv-list, msg-list, kanban columns) still scroll normally. */
+body.wa-fullscreen { overflow: hidden; }
 body.wa-fullscreen .cr-app {
     max-width: none;
     padding: 0;
@@ -480,6 +483,14 @@ body.wa-fullscreen .cr-app {
 }
 .contact-link:hover { text-decoration: underline; }
 
+/* Force Bootstrap modal layers above our Contact 360 overlay (1075) and
+   bell dropdown (1080). Without this, any modal opened from inside the
+   overlay (Compose WhatsApp, Convert to Lead, Recording detail from
+   Contact 360 timeline, etc.) renders behind it. Universal — applies to
+   every modal in the app via the generic .modal class. */
+.modal-backdrop { z-index: 1085 !important; }
+.modal { z-index: 1090 !important; }
+
 .cr-contact-overlay {
     position: fixed;
     inset: 0;
@@ -693,10 +704,15 @@ body.wa-fullscreen .cr-app {
     flex-wrap: wrap;
 }
 .rec-actions { margin-top: .35rem; }
-.cr-call-btn, .cr-wa-btn { font-size: .72rem; padding: .15rem .5rem; line-height: 1.4; }
-.cr-call-btn i, .cr-wa-btn i { margin-right: .15rem; }
+.cr-call-btn, .cr-wa-btn, .cr-lead-btn {
+    font-size: .72rem;
+    padding: .15rem .5rem;
+    line-height: 1.4;
+}
+.cr-call-btn i, .cr-wa-btn i, .cr-lead-btn i { margin-right: .15rem; }
 .cr-call-btn:hover { background: #e3f2fd; }
 .cr-wa-btn:hover { background: #e8f5e9; }
+.cr-lead-btn:hover { background: #fff8e1; }
 
 /* ─── Pipeline / kanban ────────────────────────────────────────── */
 .cr-pipeline {
@@ -716,7 +732,8 @@ body.wa-fullscreen .cr-app {
     min-height: 0;
 }
 .kanban-col {
-    flex: 0 0 300px;
+    flex: 1 1 280px;
+    max-width: 480px;
     background: #f8f9fc;
     border-radius: 10px;
     display: flex;

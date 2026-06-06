@@ -349,6 +349,7 @@ const Recordings = {
                 Contact.openByPhone(el.dataset.contactPhone);
             }));
         Compose.bindButtons();
+        Lead.bindButtons();
     },
     rowHTML(r) {
         return `
@@ -458,6 +459,7 @@ const Detail = {
         $$('#cr-modal-footer [data-act]').forEach(b =>
             b.addEventListener('click', () => Detail.act(rec.id, b.dataset.act)));
         Compose.bindButtons($('#cr-modal-footer'));
+        Lead.bindButtons($('#cr-modal-footer'));
         $$('#cr-modal-body [data-contact-phone]').forEach(el =>
             el.addEventListener('click', (ev) => {
                 ev.stopPropagation();
@@ -487,18 +489,35 @@ const Detail = {
     },
 
     async openConvertToLead(recordingId) {
+        const rec = STATE.cache.currentRec || {};
+        Lead.openConvertModal({
+            recordingId,
+            phone: rec.phone,
+            partnerName: rec.matched_partner_name,
+            defaultName: 'Call from ' + (rec.matched_partner_name || rec.phone || 'unknown'),
+            hint: 'Phone, contact (if matched), and transcript will be auto-attached.',
+        });
+    },
+};
+
+// ─── Lead — shared "Convert to Lead" modal (used by Recording, WhatsApp, Contact 360) ─
+const Lead = {
+    async openConvertModal({ recordingId = null, phone = '', partnerName = '',
+                             defaultName = '', description = '', hint = '' } = {}) {
         const stagesR = await rpc('/calls/api/leads/stages');
         const stages = (stagesR && stagesR.ok) ? stagesR.stages : [];
         const stageOpts = stages.map(s =>
             `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
-        const rec = STATE.cache.currentRec || {};
-        const defaultName = 'Call from ' + (rec.matched_partner_name || rec.phone || 'unknown');
+        const title = (defaultName || 'Lead from ' + (partnerName || phone || 'unknown'));
+        const defaultHint = recordingId
+            ? 'Phone, contact (if matched), and transcript will be auto-attached.'
+            : 'Phone and matched contact (if any) will be linked to the lead.';
         modalOpen({
-            title: 'Convert recording to lead',
+            title: recordingId ? 'Convert recording to lead' : 'Convert to lead',
             body: `
                 <div class="mb-2">
                     <label class="form-label small fw-semibold">Lead title *</label>
-                    <input class="form-control" id="ctl-name" value="${escapeHtml(defaultName)}"/>
+                    <input class="form-control" id="ctl-name" value="${escapeHtml(title)}"/>
                 </div>
                 <div class="row g-2">
                     <div class="col-6">
@@ -512,7 +531,7 @@ const Detail = {
                 </div>
                 <div class="alert alert-info small mt-2 mb-0">
                     <i class="bi bi-info-circle"></i>
-                    Phone, contact (if matched), and transcript will be auto-attached.
+                    ${escapeHtml(hint || defaultHint)}
                 </div>`,
             footer: `
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -524,13 +543,44 @@ const Detail = {
             const expected_revenue = parseFloat($('#ctl-rev').value) || 0;
             const stage_id = parseInt($('#ctl-stage').value, 10) || null;
             if (!name) { toast('Title required', 'warning'); return; }
-            const r = await rpc('/calls/api/leads/from_recording',
-                { recording_id: recordingId, name, expected_revenue, stage_id });
+            const r = recordingId
+                ? await rpc('/calls/api/leads/from_recording',
+                    { recording_id: recordingId, name, expected_revenue, stage_id })
+                : await rpc('/calls/api/leads/from_phone',
+                    { phone, name, expected_revenue, stage_id, description });
             if (r && r.ok) {
                 toast('Lead created.', 'success');
                 modalClose();
                 setTimeout(() => Pipeline.openDetail(r.lead_id), 200);
             }
+        });
+    },
+
+    convertBtn(phone, partnerName, label) {
+        if (!phone) return '';
+        const data = JSON.stringify({ phone, partnerName: partnerName || '' });
+        return `<button class="btn btn-sm btn-outline-success cr-lead-btn"
+                        data-lead-convert='${escapeHtml(data)}'
+                        title="Convert to lead">
+            <i class="bi bi-bullseye"></i>${label ? ' ' + escapeHtml(label) : ''}
+        </button>`;
+    },
+
+    bindButtons(root) {
+        const scope = root || document;
+        $$('[data-lead-convert]', scope).forEach(el => {
+            if (el._leadBound) return;
+            el._leadBound = true;
+            el.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                let info = {};
+                try { info = JSON.parse(el.dataset.leadConvert); } catch(e) {}
+                Lead.openConvertModal({
+                    phone: info.phone,
+                    partnerName: info.partnerName,
+                    defaultName: 'Lead from ' + (info.partnerName || info.phone || 'unknown'),
+                });
+            });
         });
     },
 };
@@ -1308,6 +1358,7 @@ const WhatsApp = {
                     <span class="text-muted small ms-1">${escapeHtml(conv.phone || '')}</span>
                 </div>
                 <div class="d-flex gap-1">
+                    ${Lead.convertBtn(conv.phone, conv.contact_name, 'Lead')}
                     <button class="btn btn-sm btn-outline-secondary" id="wa-msgs-refresh">
                         <i class="bi bi-arrow-clockwise"></i>
                     </button>
@@ -1410,6 +1461,7 @@ const WhatsApp = {
                 Contact.openByPhone(el.dataset.contactPhone);
             }));
         Compose.bindButtons();
+        Lead.bindButtons();
     },
 
     async loadConversations() {
@@ -1646,6 +1698,7 @@ const Contact = {
                     ${p.phone ? `
                         <div class="contact-actions mt-2">
                             ${Compose.waSendBtn(p.phone, 'WhatsApp')}
+                            ${Lead.convertBtn(p.phone, p.partner_name || p.display_name, 'Convert to Lead')}
                         </div>` : ''}
                 </div>
                 <div class="contact-kpi-strip">
@@ -1689,6 +1742,7 @@ const Contact = {
         $$('[data-contact-open-rec]').forEach(b =>
             b.addEventListener('click', () => Detail.open(parseInt(b.dataset.contactOpenRec, 10))));
         Compose.bindButtons(overlay);
+        Lead.bindButtons(overlay);
     },
 
     itemHTML(it) {
@@ -1953,6 +2007,7 @@ const Pipeline = {
         $$('[data-ld-act]').forEach(b =>
             b.addEventListener('click', () => Pipeline.act(ld.id, b.dataset.ldAct)));
         Compose.bindButtons($('#cr-modal-footer'));
+        Lead.bindButtons($('#cr-modal-footer'));
         Pipeline._wireTabInteractions();
     },
 

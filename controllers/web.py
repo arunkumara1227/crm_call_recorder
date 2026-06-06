@@ -1118,6 +1118,48 @@ class CrmCallRecorderWeb(http.Controller):
                 pass
         return _ok(lead_id=lead.id)
 
+    @http.route('/calls/api/leads/from_phone', type='json',
+                auth='user', csrf=False)
+    def api_lead_from_phone(self, phone=None, name=None,
+                            expected_revenue=0, stage_id=None,
+                            description=None):
+        """Create a crm.lead from a phone number (e.g. a WhatsApp contact).
+        Looks up matched res.partner by phone digits using the same
+        last-10-digit ilike pattern used elsewhere."""
+        if not phone or not str(phone).strip():
+            return _err('phone required')
+
+        Stage = request.env['crm.stage'].sudo()
+        stage = Stage.browse(int(stage_id)) if stage_id else False
+        if not stage or not stage.exists():
+            stage = Stage.search([], order='sequence asc', limit=1)
+
+        digits = re.sub(r'\D', '', str(phone))[-10:]
+        Partner = request.env['res.partner'].sudo()
+        partner = Partner.search([('phone', 'ilike', digits)], limit=1) if digits else Partner.browse()
+        if not partner and digits and 'mobile' in Partner._fields:
+            partner = Partner.search([('mobile', 'ilike', digits)], limit=1)
+
+        title = (name or '').strip() or (
+            'Lead from %s' % (partner.name if partner else (phone or 'unknown')))
+
+        vals = {
+            'name': title,
+            'phone': phone,
+            'expected_revenue': float(expected_revenue or 0),
+            'type': 'lead' if 'type' in request.env['crm.lead']._fields else False,
+        }
+        if description and description.strip():
+            vals['description'] = description.strip()
+        if partner:
+            vals['partner_id'] = partner.id
+        if stage:
+            vals['stage_id'] = stage.id
+        vals = {k: v for k, v in vals.items() if v is not False}
+
+        lead = request.env['crm.lead'].sudo().create(vals)
+        return _ok(lead_id=lead.id)
+
     # ─── CRM WhatsApp — outbound send ──────────────────────────────────
 
     @http.route('/calls/api/wa/send_message', type='json',
